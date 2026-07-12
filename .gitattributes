@@ -1,0 +1,2 @@
+# Track compiled cross-platform binaries using Git LFS to prevent repo bloat
+bin/* filter=lfs diff=lfs merge=lfs -text
