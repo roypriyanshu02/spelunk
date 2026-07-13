@@ -6,8 +6,12 @@
   "scripts": {
     "test": "vitest run"
   },
+  "dependencies": {
+    "web-tree-sitter": "^0.22.4"
+  },
   "devDependencies": {
     "@types/node": "^26.1.1",
+    "tree-sitter-wasms": "^0.1.13",
     "vitest": "^4.1.10"
   }
 }
