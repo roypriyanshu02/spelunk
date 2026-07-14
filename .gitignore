@@ -4,3 +4,5 @@ temp/
 evals/
 .spelunk/
 *.db
+dist/
+.tsdown/

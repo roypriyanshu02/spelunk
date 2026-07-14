@@ -4,7 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "build": "node --experimental-strip-types scripts/build.ts",
+    "init": "npm run build",
+    "test": "vitest run",
+    "lint": "tsc --noEmit && oxlint --ignore-path .prettierignore",
+    "format": "oxfmt --write --ignore-path .prettierignore"
   },
   "dependencies": {
     "ignore": "^7.0.6",
@@ -13,7 +17,12 @@
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0",
     "tree-sitter-wasms": "^0.1.13",
+    "tsdown": "^0.22.7",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^4.1.10"
   }
 }
