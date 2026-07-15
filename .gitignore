@@ -6,3 +6,4 @@ evals/
 *.db
 dist/
 .tsdown/
+.benchmark_repos/

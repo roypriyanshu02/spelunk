@@ -1,0 +1,61 @@
+{
+  "timestamp": "2026-07-17T13:47:02.597Z",
+  "scenarios": [
+    {
+      "scenario": "Scenario 1: Find SpelunkDB definition and exports",
+      "baseline": {
+        "turns": 2,
+        "inputTokens": 45,
+        "outputTokens": 1766,
+        "totalTokens": 1811,
+        "durationMs": 7
+      },
+      "spelunk": {
+        "turns": 2,
+        "inputTokens": 196,
+        "outputTokens": 282,
+        "totalTokens": 478,
+        "durationMs": 128
+      }
+    },
+    {
+      "scenario": "Scenario 2: Find explain.ts dependencies",
+      "baseline": {
+        "turns": 2,
+        "inputTokens": 50,
+        "outputTokens": 234,
+        "totalTokens": 284,
+        "durationMs": 4
+      },
+      "spelunk": {
+        "turns": 1,
+        "inputTokens": 11,
+        "outputTokens": 315,
+        "totalTokens": 326,
+        "durationMs": 77
+      }
+    },
+    {
+      "scenario": "Scenario 3: Identify Express application exports",
+      "baseline": {
+        "turns": 1,
+        "inputTokens": 6,
+        "outputTokens": 559,
+        "totalTokens": 565,
+        "durationMs": 0
+      },
+      "spelunk": {
+        "turns": 1,
+        "inputTokens": 8,
+        "outputTokens": 176,
+        "totalTokens": 184,
+        "durationMs": 85
+      }
+    }
+  ],
+  "summary": {
+    "turnReductionPercent": 20,
+    "tokenReductionPercent": 62.86,
+    "totalTokensSaved": 1672
+  }
+}
