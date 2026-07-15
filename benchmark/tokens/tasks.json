@@ -1,0 +1,171 @@
+[
+  {
+    "repo": "spelunk",
+    "script": "src/commands/find.ts",
+    "args": ["SpelunkDB"],
+    "assertions": [
+      { "path": "files", "operator": "any-equals", "property": "path", "value": "src/core/db.ts" }
+    ]
+  },
+  {
+    "repo": "spelunk",
+    "script": "src/commands/find.ts",
+    "args": ["scan.ts"],
+    "assertions": [
+      {
+        "path": "files",
+        "operator": "any-equals",
+        "property": "path",
+        "value": "src/commands/scan.ts"
+      }
+    ]
+  },
+  {
+    "repo": "spelunk",
+    "script": "src/commands/deps.ts",
+    "args": ["src/commands/explain.ts", "out"],
+    "assertions": [
+      {
+        "path": "files",
+        "operator": "any-equals",
+        "property": "path",
+        "value": "src/core/index.ts"
+      }
+    ]
+  },
+  {
+    "repo": "spelunk",
+    "script": "src/commands/outline.ts",
+    "args": ["src/core/db.ts"],
+    "assertions": [
+      { "path": "files", "operator": "any-includes", "property": "exports", "value": "SpelunkDB" }
+    ]
+  },
+  {
+    "repo": "spelunk",
+    "script": "src/commands/export.ts",
+    "args": ["json"],
+    "assertions": [{ "path": "files", "operator": "is-array" }]
+  },
+  {
+    "repo": "express",
+    "script": "src/commands/find.ts",
+    "args": ["Router"],
+    "assertions": [
+      {
+        "path": "files",
+        "operator": "any-equals",
+        "property": "path",
+        "value": "lib/router/index.js"
+      }
+    ]
+  },
+  {
+    "repo": "express",
+    "script": "src/commands/find.ts",
+    "args": ["express"],
+    "assertions": [
+      { "path": "files", "operator": "any-equals", "property": "path", "value": "lib/express.js" }
+    ]
+  },
+  {
+    "repo": "express",
+    "script": "src/commands/deps.ts",
+    "args": ["lib/express.js", "out"],
+    "assertions": [
+      { "path": "files", "operator": "any-includes", "property": "path", "value": "response" }
+    ]
+  },
+  {
+    "repo": "express",
+    "script": "src/commands/outline.ts",
+    "args": ["lib/express.js"],
+    "assertions": [
+      {
+        "path": "files",
+        "operator": "any-includes",
+        "property": "exports",
+        "value": "createApplication"
+      }
+    ]
+  },
+  {
+    "repo": "express",
+    "script": "src/commands/outline.ts",
+    "args": ["lib/router/route.js"],
+    "assertions": [
+      { "path": "files", "operator": "any-includes", "property": "exports", "value": "Route" }
+    ]
+  },
+  {
+    "repo": "requests",
+    "script": "src/commands/find.ts",
+    "args": ["Session"],
+    "assertions": [
+      {
+        "path": "files",
+        "operator": "any-equals",
+        "property": "path",
+        "value": "src/requests/sessions.py"
+      }
+    ]
+  },
+  {
+    "repo": "requests",
+    "script": "src/commands/find.ts",
+    "args": ["requests"],
+    "assertions": [
+      {
+        "path": "files",
+        "operator": "any-equals",
+        "property": "path",
+        "value": "src/requests/__init__.py"
+      }
+    ]
+  },
+  {
+    "repo": "requests",
+    "script": "src/commands/outline.ts",
+    "args": ["src/requests/sessions.py"],
+    "assertions": [
+      { "path": "files", "operator": "any-includes", "property": "imports", "value": "collections" }
+    ]
+  },
+  {
+    "repo": "gin",
+    "script": "src/commands/find.ts",
+    "args": ["Engine"],
+    "assertions": [
+      { "path": "files", "operator": "any-equals", "property": "path", "value": "gin.go" }
+    ]
+  },
+  {
+    "repo": "gin",
+    "script": "src/commands/outline.ts",
+    "args": ["gin.go"],
+    "assertions": [
+      { "path": "files", "operator": "any-includes", "property": "exports", "value": "Default" }
+    ]
+  },
+  {
+    "repo": "ripgrep",
+    "script": "src/commands/find.ts",
+    "args": ["main.rs"],
+    "assertions": [
+      {
+        "path": "files",
+        "operator": "any-equals",
+        "property": "path",
+        "value": "crates/core/main.rs"
+      }
+    ]
+  },
+  {
+    "repo": "ripgrep",
+    "script": "src/commands/outline.ts",
+    "args": ["crates/core/main.rs"],
+    "assertions": [
+      { "path": "files", "operator": "any-includes", "property": "imports", "value": "ExitCode" }
+    ]
+  }
+]

@@ -1,0 +1,5 @@
+spelunk
+https://github.com/expressjs/express.git@d36495d7e666f30c06fbb0e039771c5267d7d1d4
+https://github.com/psf/requests.git@v2.32.3
+https://github.com/gin-gonic/gin.git@v1.10.0
+https://github.com/BurntSushi/ripgrep.git@14.1.0

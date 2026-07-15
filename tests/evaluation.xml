@@ -1,0 +1,42 @@
+<evaluation>
+   <qa_pair>
+      <question>Which file in the codebase exports the symbol SpelunkDB? Provide the repository-relative path.</question>
+      <answer>src/core/db.ts</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Find the script in the commands directory that imports scanDirectory from ../core/scanner. What is the repository-relative path to this file?</question>
+      <answer>src/commands/scan.ts</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>How many total symbols (exports) are exported by the file src/core/query.ts? Return the numerical count.</question>
+      <answer>6</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Trace the outgoing dependencies of src/commands/scan.ts to find which file is at depth/rank 2 and exports FileRecord. What is the repository-relative path of this file?</question>
+      <answer>src/core/db.ts</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Which file in the core directory exports the class SpelunkDB and has only external module/node imports? Provide the repository-relative path.</question>
+      <answer>src/core/db.ts</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Identify the file in the src/core directory that has local imports from both ./db and ./parser. What is the repository-relative path of this file?</question>
+      <answer>src/core/scanner.ts</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Use the structural diff tool to compare fileA as 'src/core/db.ts' and fileB as 'src/core/parser.ts'. What is the first exported symbol listed as added in fileB?</question>
+      <answer>initParser</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Trace the incoming imports (dependencies) of 'src/core/db.ts'. Which file at depth 1 imports 'src/core/db.ts' and also imports ./parser? Provide the repository-relative path.</question>
+      <answer>src/core/scanner.ts</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Which file in the src/core directory exports the function resetParser? Provide the repository-relative path.</question>
+      <answer>src/core/parser.ts</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Find the script in the commands directory that imports runFind from ../core/query. What is the repository-relative path to this file?</question>
+      <answer>src/commands/find.ts</answer>
+   </qa_pair>
+</evaluation>
