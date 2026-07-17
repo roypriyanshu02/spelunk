@@ -1,7 +1,51 @@
 {
   "name": "spelunk",
   "version": "0.1.0",
-  "private": true,
+  "description": "AST-powered codebase indexer skill for coding agents. Parses repositories with Tree-sitter into a local SQLite index so agents trace dependency trees and locate symbols instantly instead of scanning raw files. Reduces token consumption by up to 90% with ~150ms resolution.",
+  "keywords": [
+    "github-copilot",
+    "claude-code",
+    "cursor",
+    "ai-agent",
+    "coding-agent",
+    "tree-sitter",
+    "sqlite",
+    "ast",
+    "codex",
+    "devin",
+    "cline",
+    "opencode",
+    "antigravity",
+    "agent-skill",
+    "skills-sh",
+    "developer-tools",
+    "llm-tools",
+    "skill",
+    "codebase-indexer",
+    "codebase-navigation",
+    "codebase-map",
+    "dependency-tree",
+    "symbol-resolution",
+    "code-indexing",
+    "token-optimization",
+    "spelunk"
+  ],
+  "homepage": "https://github.com/roypriyanshu02/spelunk",
+  "bugs": {
+    "url": "https://github.com/roypriyanshu02/spelunk/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Priyanshu Roy",
+    "url": "https://github.com/roypriyanshu02"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roypriyanshu02/spelunk.git"
+  },
+  "files": [
+    "skills"
+  ],
   "type": "module",
   "scripts": {
     "build": "node --experimental-strip-types scripts/build.ts",
@@ -27,5 +71,9 @@
     "tsdown": "^0.22.7",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=24.18.0",
+    "npm": ">=11.16.0"
   }
 }
