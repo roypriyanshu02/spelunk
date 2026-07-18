@@ -14,12 +14,14 @@ export default defineConfig([
     entry: ["src/commands/*.ts"],
     format: "esm",
     minify: false,
+    shims: true,
     platform: "node",
     target: "node24",
     outDir: "skills/spelunk/scripts",
     clean: true,
     deps: {
       neverBundle: ["node:sqlite"],
+      alwaysBundle: ["web-tree-sitter", "tsconfig-paths", "ignore"],
     },
     outputOptions: {
       banner: "#!/usr/bin/env node",
