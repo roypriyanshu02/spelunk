@@ -2,8 +2,8 @@ node_modules/
 npm-debug.log
 temp/
 evals/
-.spelunk/
 *.db
 dist/
 .tsdown/
 .benchmark_repos/
+

@@ -12,6 +12,12 @@
       "sourceType": "github",
       "skillPath": "skills/skill-creator/SKILL.md",
       "computedHash": "5ea13a6d9f0d4bb694405d79acd00cadec0d21bb138c4dd10fcf3c500cb835c2"
+    },
+    "spelunk": {
+      "source": "roypriyanshu02/spelunk",
+      "sourceType": "github",
+      "skillPath": "skills/spelunk/SKILL.md",
+      "computedHash": "524d6ead82798c5fa337e5f839bd335c6b21cced56a1b125306421dabfeb85f8"
     }
   }
 }
