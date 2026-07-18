@@ -206,11 +206,11 @@ const PS_EXPORT_REGEX = /function\s+([a-zA-Z0-9_-]+)/gi;
 const ASM_IMPORT_REGEX = /^\s*[%]?include\s+['"<]?([a-zA-Z0-9_\-./\\]+)['">]?/gim;
 const ASM_EXPORT_REGEX = /^\s*(?:global|public)\s+([a-zA-Z0-9_]+)/gim;
 
-const SVELTE_SCRIPT_REGEX = /<script[^>]*>([\s\S]*?)<\/script>/gi;
+const SVELTE_SCRIPT_REGEX = /<script\b[^>]*>([\s\S]*?)<\/script\b[^>]*>/gi;
 const SVELTE_IMPORT_REGEX = /import\s+(?:[^"']*?\s+from\s+)?['"]([^'"]+)['"]/g;
 const SVELTE_EXPORT_REGEX = /export\s+(?:let|const|var|function|class)\s+([a-zA-Z0-9_]+)/g;
 
-const ASTRO_FM_REGEX = /^---\r?\n([\s\S]*?)\r?\n---/d;
+const ASTRO_FM_REGEX = /^---\r?\n([\s\S]*?)\r?\n---/;
 const ASTRO_IMPORT_REGEX = /import\s+(?:[^"']*?\s+from\s+)?['"]([^'"]+)['"]/g;
 const ASTRO_EXPORT_REGEX = /export\s+(?:let|const|var|function|class)\s+([a-zA-Z0-9_]+)/g;
 
@@ -303,9 +303,15 @@ export function parseCustomFile(
   }
   // 4. Svelte
   else if (ext === ".svelte") {
+    let cleanContent = content;
+    let prev;
+    do {
+      prev = cleanContent;
+      cleanContent = cleanContent.replace(/<!--[\s\S]*?-->/g, "");
+    } while (cleanContent !== prev);
     SVELTE_SCRIPT_REGEX.lastIndex = 0;
     let scriptMatch;
-    while ((scriptMatch = SVELTE_SCRIPT_REGEX.exec(content)) !== null) {
+    while ((scriptMatch = SVELTE_SCRIPT_REGEX.exec(cleanContent)) !== null) {
       const scriptContent = scriptMatch[1];
       SVELTE_IMPORT_REGEX.lastIndex = 0;
       SVELTE_EXPORT_REGEX.lastIndex = 0;

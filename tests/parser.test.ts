@@ -203,6 +203,41 @@ describe("Parser — AST parser", () => {
     expect(svelte.imports).toContain("./Header.svelte");
     expect(svelte.exports).toContain("title");
 
+    // Svelte with whitespace/attributes in closing tag
+    const svelteWhitespace = await parseFile(
+      "App.svelte",
+      "<script>\nimport Header from './Header.svelte';\nexport let title = 'Hi';\n</script  >",
+    );
+    expect(svelteWhitespace.imports).toContain("./Header.svelte");
+    expect(svelteWhitespace.exports).toContain("title");
+
+    const svelteAttributes = await parseFile(
+      "App.svelte",
+      "<script>\nimport Header from './Header.svelte';\nexport let title = 'Hi';\n</script foo=\"bar\">",
+    );
+    expect(svelteAttributes.imports).toContain("./Header.svelte");
+    expect(svelteAttributes.exports).toContain("title");
+
+    // Svelte with commented-out script tags
+    const svelteCommented = await parseFile(
+      "App.svelte",
+      "<!-- <script>\nimport Hidden from './Hidden.svelte';\nexport let hidden = true;\n</script> -->\n<script>\nimport Visible from './Visible.svelte';\nexport let visible = true;\n</script>",
+    );
+    expect(svelteCommented.imports).toContain("./Visible.svelte");
+    expect(svelteCommented.imports).not.toContain("./Hidden.svelte");
+    expect(svelteCommented.exports).toContain("visible");
+    expect(svelteCommented.exports).not.toContain("hidden");
+
+    // Svelte with nested commented-out script tags
+    const svelteNestedCommented = await parseFile(
+      "App.svelte",
+      "<!-- <!-- <script>\nimport Hidden from './Hidden.svelte';\nexport let hidden = true;\n</script> --> -->\n<script>\nimport Visible from './Visible.svelte';\nexport let visible = true;\n</script>",
+    );
+    expect(svelteNestedCommented.imports).toContain("./Visible.svelte");
+    expect(svelteNestedCommented.imports).not.toContain("./Hidden.svelte");
+    expect(svelteNestedCommented.exports).toContain("visible");
+    expect(svelteNestedCommented.exports).not.toContain("hidden");
+
     // Astro
     const astro = await parseFile(
       "index.astro",

@@ -658,8 +658,7 @@ var require_tree_sitter = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 					if (Module["wasmBinary"]) wasmBinary = Module["wasmBinary"];
 					var wasmMemory;
 					var ABORT = false;
-					var EXITSTATUS;
-					var HEAP8, HEAPU8, HEAP16, HEAPU16, HEAP32, HEAPU32, HEAPF32, HEAPF64;
+					var EXITSTATUS, HEAP8, HEAPU8;
 					var HEAP_DATA_VIEW;
 					function updateMemoryViews() {
 						var b = wasmMemory.buffer;
@@ -989,7 +988,7 @@ var require_tree_sitter = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 								} else if (subsectionType === WASM_DYLINK_IMPORT_INFO) {
 									var count = getLEB();
 									while (count--) {
-										var modname = getString();
+										getString();
 										var symname = getString();
 										var flags = getLEB();
 										if ((flags & WASM_SYMBOL_BINDING_MASK) == WASM_SYMBOL_BINDING_WEAK) customSection.weakImports.add(symname);
@@ -1264,8 +1263,7 @@ var require_tree_sitter = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 						var metadata = getDylinkMetadata(binary);
 						currentModuleWeakSymbols = metadata.weakImports;
 						function loadModule() {
-							var firstLoad = !handle || !HEAP8[handle + 8];
-							if (firstLoad) {
+							if (!handle || !HEAP8[handle + 8]) {
 								var memAlign = Math.pow(2, metadata.memoryAlign);
 								var memoryBase = metadata.memorySize ? alignMemory(getMemory(metadata.memorySize + memAlign), memAlign) : 0;
 								var tableBase = metadata.tableSize ? wasmTable.length : 0;
@@ -1289,7 +1287,7 @@ var require_tree_sitter = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 								if (!resolved) resolved = moduleExports[sym];
 								return resolved;
 							}
-							var proxyHandler = { get(stubs, prop) {
+							var proxy = new Proxy({}, { get(stubs, prop) {
 								switch (prop) {
 									case "__memory_base": return memoryBase;
 									case "__table_base": return tableBase;
@@ -1303,8 +1301,7 @@ var require_tree_sitter = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 									};
 								}
 								return stubs[prop];
-							} };
-							var proxy = new Proxy({}, proxyHandler);
+							} });
 							var info = {
 								"GOT.mem": new Proxy({}, GOTHandler),
 								"GOT.func": new Proxy({}, GOTHandler),
@@ -1322,7 +1319,7 @@ var require_tree_sitter = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 									else break;
 									args = args.join(",");
 									var func = `(${args}) => { ${body} };`;
-									ASM_CONSTS[start] = eval(func);
+									ASM_CONSTS[start] = (0, eval)(func);
 								}
 								if ("__start_em_asm" in moduleExports) {
 									var start = moduleExports["__start_em_asm"];
@@ -1340,11 +1337,11 @@ var require_tree_sitter = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 										cSig = cSig.split(",");
 										for (var i in cSig) {
 											var jsArg = cSig[i].split(" ").pop();
-											jsArgs.push(jsArg.replace("*", ""));
+											jsArgs.push(jsArg.replaceAll("*", ""));
 										}
 									}
 									var func = `(${jsArgs}) => ${body};`;
-									moduleExports[name] = eval(func);
+									moduleExports[name] = (0, eval)(func);
 								}
 								for (var name in moduleExports) if (name.startsWith("__em_js__")) {
 									var start = moduleExports[name];
@@ -1565,7 +1562,7 @@ var require_tree_sitter = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 					_fd_close.sig = "ii";
 					var convertI32PairToI53Checked = (lo, hi) => hi + 2097152 >>> 0 < 4194305 - !!lo ? (lo >>> 0) + hi * 4294967296 : NaN;
 					function _fd_seek(fd, offset_low, offset_high, whence, newOffset) {
-						var offset = convertI32PairToI53Checked(offset_low, offset_high);
+						convertI32PairToI53Checked(offset_low, offset_high);
 						return 70;
 					}
 					_fd_seek.sig = "iiiiip";
@@ -1931,7 +1928,7 @@ var require_tree_sitter = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 					const SIZE_OF_CURSOR = 4 * SIZE_OF_INT;
 					const SIZE_OF_NODE = 5 * SIZE_OF_INT;
 					const SIZE_OF_POINT = 2 * SIZE_OF_INT;
-					const SIZE_OF_RANGE = 2 * SIZE_OF_INT + 2 * SIZE_OF_POINT;
+					const SIZE_OF_RANGE = 24;
 					const ZERO_POINT = {
 						row: 0,
 						column: 0
@@ -3497,10 +3494,10 @@ const PS_DOT_REGEX = /^\s*\.\s+['"]?([^\r\n'"]+\.ps1)['"]?/gim;
 const PS_EXPORT_REGEX = /function\s+([a-zA-Z0-9_-]+)/gi;
 const ASM_IMPORT_REGEX = /^\s*[%]?include\s+['"<]?([a-zA-Z0-9_\-./\\]+)['">]?/gim;
 const ASM_EXPORT_REGEX = /^\s*(?:global|public)\s+([a-zA-Z0-9_]+)/gim;
-const SVELTE_SCRIPT_REGEX = /<script[^>]*>([\s\S]*?)<\/script>/gi;
+const SVELTE_SCRIPT_REGEX = /<script\b[^>]*>([\s\S]*?)<\/script\b[^>]*>/gi;
 const SVELTE_IMPORT_REGEX = /import\s+(?:[^"']*?\s+from\s+)?['"]([^'"]+)['"]/g;
 const SVELTE_EXPORT_REGEX = /export\s+(?:let|const|var|function|class)\s+([a-zA-Z0-9_]+)/g;
-const ASTRO_FM_REGEX = /^---\r?\n([\s\S]*?)\r?\n---/d;
+const ASTRO_FM_REGEX = /^---\r?\n([\s\S]*?)\r?\n---/;
 const ASTRO_IMPORT_REGEX = /import\s+(?:[^"']*?\s+from\s+)?['"]([^'"]+)['"]/g;
 const ASTRO_EXPORT_REGEX = /export\s+(?:let|const|var|function|class)\s+([a-zA-Z0-9_]+)/g;
 const DENO_COMMENT_REGEX = /\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm;
@@ -3569,9 +3566,15 @@ function parseCustomFile(filePath, content) {
 		while ((match = ASM_IMPORT_REGEX.exec(content)) !== null) imports.push(match[1]);
 		while ((match = ASM_EXPORT_REGEX.exec(content)) !== null) exports.push(match[1]);
 	} else if (ext === ".svelte") {
+		let cleanContent = content;
+		let prev;
+		do {
+			prev = cleanContent;
+			cleanContent = cleanContent.replace(/<!--[\s\S]*?-->/g, "");
+		} while (cleanContent !== prev);
 		SVELTE_SCRIPT_REGEX.lastIndex = 0;
 		let scriptMatch;
-		while ((scriptMatch = SVELTE_SCRIPT_REGEX.exec(content)) !== null) {
+		while ((scriptMatch = SVELTE_SCRIPT_REGEX.exec(cleanContent)) !== null) {
 			const scriptContent = scriptMatch[1];
 			SVELTE_IMPORT_REGEX.lastIndex = 0;
 			SVELTE_EXPORT_REGEX.lastIndex = 0;
@@ -4353,7 +4356,7 @@ var require_try_path = /* @__PURE__ */ __commonJSMin(((exports) => {
 			var starMatch = entry.pattern === requestedModule ? "" : matchStar(entry.pattern, requestedModule);
 			if (starMatch !== void 0) {
 				var _loop_1 = function(physicalPathPattern) {
-					var physicalPath = physicalPathPattern.replace("*", starMatch);
+					var physicalPath = physicalPathPattern.replaceAll("*", starMatch);
 					pathsToTry.push({
 						type: "file",
 						path: physicalPath
