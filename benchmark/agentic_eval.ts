@@ -1,36 +1,45 @@
-import { spawnSync } from "child_process";
 import fs from "fs";
 import path from "path";
-import { getEncoding } from "js-tiktoken";
-
-const enc = getEncoding("cl100k_base");
-const benchmarkReposDir = path.join(process.cwd(), ".benchmark_repos");
+import {
+  colors,
+  enc,
+  execCmdAsync,
+  verifyEnvironment,
+  isSafeArgument,
+  getLatestMtime,
+  isCacheValid,
+  projectRoot,
+  benchmarkDir,
+  benchmarkReposDir,
+  scriptsDir,
+  srcDir,
+} from "./shared.ts";
 
 // Absolute script paths
-const findScript = path.join(process.cwd(), "skills/spelunk/scripts/find.mjs");
-const outlineScript = path.join(process.cwd(), "skills/spelunk/scripts/outline.mjs");
-const depsScript = path.join(process.cwd(), "skills/spelunk/scripts/deps.mjs");
-const scanScript = path.join(process.cwd(), "skills/spelunk/scripts/scan.mjs");
+const findScript = path.join(scriptsDir, "find.mjs");
+const outlineScript = path.join(scriptsDir, "outline.mjs");
+const depsScript = path.join(scriptsDir, "deps.mjs");
+const scanScript = path.join(scriptsDir, "scan.mjs");
 
-function execCmd(cmd: string[], cwd: string) {
-  const start = Date.now();
-  const res = spawnSync(cmd[0], cmd.slice(1), {
-    cwd,
-    encoding: "utf-8",
-    env: process.env,
-  });
-  const duration = Date.now() - start;
-  return {
-    stdout: res.stdout || "",
-    stderr: res.stderr || "",
-    status: res.status ?? 0,
-    duration,
-  };
+// Verify runtime environment before executing harness
+if (!(await verifyEnvironment())) {
+  process.exit(1);
 }
+
+// Input validation check
+if (!process.argv.every(isSafeArgument)) {
+  console.error(
+    `${colors.red}Error: Suspicious character detected in command line arguments.${colors.reset}`,
+  );
+  process.exit(1);
+}
+
+const forceClean = process.argv.includes("--clean") || process.argv.includes("-c");
+const latestSrcMtime = getLatestMtime(srcDir);
 
 interface Action {
   name: string;
-  run: () => { input: string; output: string; duration: number };
+  run: () => Promise<{ input: string; output: string; duration: number }>;
 }
 
 interface ArmResult {
@@ -44,30 +53,44 @@ interface ArmResult {
 interface Scenario {
   name: string;
   description: string;
-  before?: () => void;
-  after?: () => void;
+  before?: () => Promise<void> | void;
+  after?: () => Promise<void> | void;
   baseline: Action[];
   spelunk: Action[];
 }
+
+/**
+ * Prepares the local Spelunk database index by scanning the codebase.
+ */
+const prepareLocalSpelunk = async () => {
+  const localSpelunkDir = projectRoot;
+  const valid = !forceClean && (await isCacheValid(localSpelunkDir, "HEAD", latestSrcMtime));
+  if (valid) {
+    console.log(`${colors.green}Using cached index for local spelunk.${colors.reset}`);
+    return;
+  }
+  console.log(
+    `${colors.cyan}Preparing local spelunk repository: scanning code structure...${colors.reset}`,
+  );
+  const scanRes = await execCmdAsync(["node", scanScript, "."], localSpelunkDir);
+  if (scanRes.status !== 0) {
+    console.error(`${colors.red}Failed to prepare local spelunk: ${scanRes.stderr}${colors.reset}`);
+    process.exit(1);
+  }
+};
 
 const scenarios: Scenario[] = [
   {
     name: "Scenario 1: Find SpelunkDB definition and exports",
     description:
       "Locate SpelunkDB class definition, list its exports, and inspect its constructor.",
-    before: () => {
-      const dbPath = path.join(process.cwd(), ".spelunk/data.db");
-      if (!fs.existsSync(dbPath)) {
-        console.log("Preparing local spelunk repository: scanning code structure...");
-        execCmd(["node", scanScript, "."], process.cwd());
-      }
-    },
+    before: prepareLocalSpelunk,
     baseline: [
       {
         name: "Grep for class SpelunkDB",
-        run: () => {
+        run: async () => {
           const cmd = ["grep", "-rn", "class SpelunkDB", "src/"];
-          const res = execCmd(cmd, process.cwd());
+          const res = await execCmdAsync(cmd, projectRoot);
           return {
             input: cmd.join(" "),
             output: res.stdout,
@@ -77,9 +100,9 @@ const scenarios: Scenario[] = [
       },
       {
         name: "View db.ts file",
-        run: () => {
+        run: async () => {
           const start = Date.now();
-          const filePath = path.join(process.cwd(), "src/core/db.ts");
+          const filePath = path.join(projectRoot, "src/core/db.ts");
           const content = fs.readFileSync(filePath, "utf-8");
           const lines = content.split("\n").slice(0, 200).join("\n");
           return {
@@ -93,9 +116,9 @@ const scenarios: Scenario[] = [
     spelunk: [
       {
         name: "Spelunk Find SpelunkDB",
-        run: () => {
+        run: async () => {
           const cmd = ["node", findScript, "SpelunkDB"];
-          const res = execCmd(cmd, process.cwd());
+          const res = await execCmdAsync(cmd, projectRoot);
           return {
             input: `spelunk find SpelunkDB`,
             output: res.stdout,
@@ -105,9 +128,9 @@ const scenarios: Scenario[] = [
       },
       {
         name: "Spelunk Outline db.ts",
-        run: () => {
+        run: async () => {
           const cmd = ["node", outlineScript, "src/core/db.ts"];
-          const res = execCmd(cmd, process.cwd());
+          const res = await execCmdAsync(cmd, projectRoot);
           return {
             input: `spelunk outline src/core/db.ts`,
             output: res.stdout,
@@ -120,19 +143,13 @@ const scenarios: Scenario[] = [
   {
     name: "Scenario 2: Find explain.ts dependencies",
     description: "Trace which modules import or depend on the explain command.",
-    before: () => {
-      const dbPath = path.join(process.cwd(), ".spelunk/data.db");
-      if (!fs.existsSync(dbPath)) {
-        console.log("Preparing local spelunk repository: scanning code structure...");
-        execCmd(["node", scanScript, "."], process.cwd());
-      }
-    },
+    before: prepareLocalSpelunk,
     baseline: [
       {
         name: "Grep for explain in src/",
-        run: () => {
+        run: async () => {
           const cmd = ["grep", "-rn", "explain", "src/"];
-          const res = execCmd(cmd, process.cwd());
+          const res = await execCmdAsync(cmd, projectRoot);
           return {
             input: cmd.join(" "),
             output: res.stdout,
@@ -142,9 +159,9 @@ const scenarios: Scenario[] = [
       },
       {
         name: "View explain.ts file",
-        run: () => {
+        run: async () => {
           const start = Date.now();
-          const filePath = path.join(process.cwd(), "src/commands/explain.ts");
+          const filePath = path.join(projectRoot, "src/commands/explain.ts");
           const content = fs.readFileSync(filePath, "utf-8");
           return {
             input: `view_file src/commands/explain.ts`,
@@ -157,9 +174,9 @@ const scenarios: Scenario[] = [
     spelunk: [
       {
         name: "Spelunk Deps explain.ts out",
-        run: () => {
+        run: async () => {
           const cmd = ["node", depsScript, "src/commands/explain.ts", "out"];
-          const res = execCmd(cmd, process.cwd());
+          const res = await execCmdAsync(cmd, projectRoot);
           return {
             input: `spelunk deps src/commands/explain.ts out`,
             output: res.stdout,
@@ -172,30 +189,61 @@ const scenarios: Scenario[] = [
   {
     name: "Scenario 3: Identify Express application exports",
     description: "Find exports and factory functions provided by the lib/express.js module.",
-    before: () => {
+    before: async () => {
       const expressDir = path.join(benchmarkReposDir, "express");
-      if (!fs.existsSync(expressDir)) {
-        console.log("Cloning express repository for evaluation...");
-        const url = "https://github.com/expressjs/express.git";
-        const cloneRes = execCmd(["git", "clone", url, "express"], benchmarkReposDir);
-        if (cloneRes.status !== 0) {
-          console.error(`Failed to clone express: ${cloneRes.stderr}`);
-        }
-        execCmd(["git", "checkout", "d36495d7e666f30c06fbb0e039771c5267d7d1d4"], expressDir);
+      const targetVersion = "d36495d7e666f30c06fbb0e039771c5267d7d1d4";
+
+      if (!fs.existsSync(benchmarkReposDir)) {
+        fs.mkdirSync(benchmarkReposDir, { recursive: true });
       }
-      console.log("Preparing express repository: scanning code structure...");
-      execCmd(["node", scanScript, "."], expressDir);
+
+      if (!fs.existsSync(expressDir)) {
+        console.log(`${colors.cyan}Cloning express repository for evaluation...${colors.reset}`);
+        const url = "https://github.com/expressjs/express.git";
+        const cloneRes = await execCmdAsync(["git", "clone", url, "express"], benchmarkReposDir);
+        if (cloneRes.status !== 0) {
+          console.error(`${colors.red}Failed to clone express: ${cloneRes.stderr}${colors.reset}`);
+          process.exit(1);
+        }
+      }
+
+      const valid = !forceClean && (await isCacheValid(expressDir, targetVersion, latestSrcMtime));
+      if (!valid) {
+        console.log(`${colors.cyan}Checking out ${targetVersion} in express...${colors.reset}`);
+        const checkoutRes = await execCmdAsync(["git", "checkout", targetVersion], expressDir);
+        if (checkoutRes.status !== 0) {
+          console.error(
+            `${colors.red}Failed to checkout express: ${checkoutRes.stderr}${colors.reset}`,
+          );
+          process.exit(1);
+        }
+        console.log(
+          `${colors.cyan}Preparing express repository: scanning code structure...${colors.reset}`,
+        );
+        const scanRes = await execCmdAsync(["node", scanScript, "."], expressDir);
+        if (scanRes.status !== 0) {
+          console.error(`${colors.red}Failed to scan express: ${scanRes.stderr}${colors.reset}`);
+          process.exit(1);
+        }
+      } else {
+        console.log(`${colors.green}Using cached index for express.${colors.reset}`);
+      }
     },
-    after: () => {
-      const expressSpelunk = path.join(benchmarkReposDir, "express/.spelunk");
-      if (fs.existsSync(expressSpelunk)) {
-        fs.rmSync(expressSpelunk, { recursive: true, force: true });
+    after: async () => {
+      if (forceClean) {
+        console.log(
+          `${colors.yellow}Cleaning up express .spelunk index as requested...${colors.reset}`,
+        );
+        const expressSpelunk = path.join(benchmarkReposDir, "express/.spelunk");
+        if (fs.existsSync(expressSpelunk)) {
+          fs.rmSync(expressSpelunk, { recursive: true, force: true });
+        }
       }
     },
     baseline: [
       {
         name: "View lib/express.js",
-        run: () => {
+        run: async () => {
           const start = Date.now();
           const filePath = path.join(benchmarkReposDir, "express/lib/express.js");
           const content = fs.readFileSync(filePath, "utf-8");
@@ -210,9 +258,9 @@ const scenarios: Scenario[] = [
     spelunk: [
       {
         name: "Spelunk Outline lib/express.js",
-        run: () => {
+        run: async () => {
           const cmd = ["node", outlineScript, "lib/express.js"];
-          const res = execCmd(cmd, path.join(benchmarkReposDir, "express"));
+          const res = await execCmdAsync(cmd, path.join(benchmarkReposDir, "express"));
           return {
             input: `spelunk outline lib/express.js`,
             output: res.stdout,
@@ -224,7 +272,11 @@ const scenarios: Scenario[] = [
   },
 ];
 
-function runArm(actions: Action[]): ArmResult {
+/**
+ * Runs a set of actions sequentially, simulating an agent turn-by-turn flow.
+ * Measures cumulative context tokens and execution duration.
+ */
+async function runArm(actions: Action[]): Promise<ArmResult> {
   let turns = 0;
   let inputTokens = 0;
   let outputTokens = 0;
@@ -233,7 +285,7 @@ function runArm(actions: Action[]): ArmResult {
   let cumulativeContextTokens = 0;
   for (const action of actions) {
     turns++;
-    const res = action.run();
+    const res = await action.run();
     const actionInputTokens = enc.encode(res.input).length;
     inputTokens += actionInputTokens + cumulativeContextTokens;
 
@@ -253,6 +305,9 @@ function runArm(actions: Action[]): ArmResult {
   };
 }
 
+/**
+ * Helper to compute and format comparison percentage differences.
+ */
 function formatDiffPercent(base: number, comp: number): string {
   if (base === 0) return "0.0%";
   const diff = ((base - comp) / base) * 100;
@@ -261,30 +316,38 @@ function formatDiffPercent(base: number, comp: number): string {
 }
 
 console.log(
-  "\n==========================================================================================",
+  `\n${colors.bold}==========================================================================================${colors.reset}`,
 );
-console.log("                           E2E AGENTIC EVALUATION HARNESS");
 console.log(
-  "==========================================================================================\n",
+  `                           ${colors.cyan}E2E AGENTIC EVALUATION HARNESS${colors.reset}`,
+);
+console.log(
+  `${colors.bold}==========================================================================================${colors.reset}\n`,
 );
 
-const evalResults: any[] = [];
+interface ScenarioResult {
+  scenario: string;
+  baseline: ArmResult;
+  spelunk: ArmResult;
+}
 
-for (const sc of scenarios) {
-  console.log(`Running: ${sc.name}`);
-  console.log(`Description: ${sc.description}`);
-  if (sc.before) sc.before();
+const evalResults: ScenarioResult[] = [];
+
+for (const scenario of scenarios) {
+  console.log(`${colors.bold}Running: ${scenario.name}${colors.reset}`);
+  console.log(`Description: ${scenario.description}`);
+  if (scenario.before) await scenario.before();
   console.log(
     "------------------------------------------------------------------------------------------",
   );
 
-  const baselineRes = runArm(sc.baseline);
-  const spelunkRes = runArm(sc.spelunk);
+  const baselineRes = await runArm(scenario.baseline);
+  const spelunkRes = await runArm(scenario.spelunk);
 
-  if (sc.after) sc.after();
+  if (scenario.after) await scenario.after();
 
   evalResults.push({
-    scenario: sc.name,
+    scenario: scenario.name,
     baseline: baselineRes,
     spelunk: spelunkRes,
   });
@@ -323,50 +386,56 @@ for (const sc of scenarios) {
     ],
   ];
 
-  // Print ASCII Table
+  // Print ASCII Table format
   const colWidths = [18, 25, 20, 28];
-  const printRow = (arr: string[]) => {
-    console.log(arr.map((val, i) => val.padEnd(colWidths[i])).join(" | "));
+  const printRow = (rowCells: string[]) => {
+    console.log(rowCells.map((val, cellIndex) => val.padEnd(colWidths[cellIndex])).join(" | "));
   };
 
   printRow(headers);
   console.log(colWidths.map((w) => "-".repeat(w)).join("-|-"));
-  rows.forEach((r) => printRow(r));
+  rows.forEach((row) => printRow(row));
   console.log(
     "------------------------------------------------------------------------------------------\n",
   );
 }
 
-// Compute aggregate metrics
+// Compute aggregate metrics for E2E impact
 const avgBaselineTurns =
-  evalResults.reduce((acc, r) => acc + r.baseline.turns, 0) / evalResults.length;
+  evalResults.reduce((accumulator, result) => accumulator + result.baseline.turns, 0) /
+  evalResults.length;
 const avgSpelunkTurns =
-  evalResults.reduce((acc, r) => acc + r.spelunk.turns, 0) / evalResults.length;
+  evalResults.reduce((accumulator, result) => accumulator + result.spelunk.turns, 0) /
+  evalResults.length;
 const avgBaselineTokens =
-  evalResults.reduce((acc, r) => acc + r.baseline.totalTokens, 0) / evalResults.length;
+  evalResults.reduce((accumulator, result) => accumulator + result.baseline.totalTokens, 0) /
+  evalResults.length;
 const avgSpelunkTokens =
-  evalResults.reduce((acc, r) => acc + r.spelunk.totalTokens, 0) / evalResults.length;
+  evalResults.reduce((accumulator, result) => accumulator + result.spelunk.totalTokens, 0) /
+  evalResults.length;
 const totalTokensSaved = evalResults.reduce(
-  (acc, r) => acc + (r.baseline.totalTokens - r.spelunk.totalTokens),
+  (accumulator, result) => accumulator + (result.baseline.totalTokens - result.spelunk.totalTokens),
   0,
 );
 
 console.log(
-  "================================= SUMMARY OF IMPACT ======================================",
+  `${colors.bold}================================= SUMMARY OF IMPACT ======================================${colors.reset}`,
 );
 console.log(
-  `Average Turn Reduction:      ${formatDiffPercent(avgBaselineTurns, avgSpelunkTurns)} (${avgBaselineTurns.toFixed(1)} -> ${avgSpelunkTurns.toFixed(1)} turns)`,
+  `Average Turn Reduction:      ${colors.green}${formatDiffPercent(avgBaselineTurns, avgSpelunkTurns)}${colors.reset} (${avgBaselineTurns.toFixed(1)} -> ${avgSpelunkTurns.toFixed(1)} turns)`,
 );
 console.log(
-  `Average Token Reduction:     ${formatDiffPercent(avgBaselineTokens, avgSpelunkTokens)} (${avgBaselineTokens.toFixed(0)} -> ${avgSpelunkTokens.toFixed(0)} tokens)`,
+  `Average Token Reduction:     ${colors.green}${formatDiffPercent(avgBaselineTokens, avgSpelunkTokens)}${colors.reset} (${avgBaselineTokens.toFixed(0)} -> ${avgSpelunkTokens.toFixed(0)} tokens)`,
 );
-console.log(`Total BPE Context Saved:     ${totalTokensSaved} tokens saved across all runs`);
 console.log(
-  "==========================================================================================\n",
+  `Total BPE Context Saved:     ${colors.green}${totalTokensSaved} tokens saved across all runs${colors.reset}`,
+);
+console.log(
+  `${colors.bold}==========================================================================================${colors.reset}\n`,
 );
 
-// Write results to JSON
-const resultsPath = path.join(import.meta.dirname, "agentic_eval_results.json");
+// Write results summary to JSON
+const resultsPath = path.join(benchmarkDir, "agentic_eval_results.json");
 fs.writeFileSync(
   resultsPath,
   JSON.stringify(

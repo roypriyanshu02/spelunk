@@ -1,38 +1,38 @@
 {
-  "timestamp": "2026-07-17T13:47:02.597Z",
+  "timestamp": "2026-07-19T19:46:54.740Z",
   "scenarios": [
     {
       "scenario": "Scenario 1: Find SpelunkDB definition and exports",
       "baseline": {
         "turns": 2,
         "inputTokens": 45,
-        "outputTokens": 1766,
-        "totalTokens": 1811,
-        "durationMs": 7
+        "outputTokens": 1802,
+        "totalTokens": 1847,
+        "durationMs": 4
       },
       "spelunk": {
         "turns": 2,
-        "inputTokens": 196,
-        "outputTokens": 282,
-        "totalTokens": 478,
-        "durationMs": 128
+        "inputTokens": 201,
+        "outputTokens": 291,
+        "totalTokens": 492,
+        "durationMs": 118
       }
     },
     {
       "scenario": "Scenario 2: Find explain.ts dependencies",
       "baseline": {
         "turns": 2,
-        "inputTokens": 50,
-        "outputTokens": 234,
-        "totalTokens": 284,
-        "durationMs": 4
+        "inputTokens": 111,
+        "outputTokens": 316,
+        "totalTokens": 427,
+        "durationMs": 9
       },
       "spelunk": {
         "turns": 1,
         "inputTokens": 11,
         "outputTokens": 315,
         "totalTokens": 326,
-        "durationMs": 77
+        "durationMs": 71
       }
     },
     {
@@ -49,13 +49,13 @@
         "inputTokens": 8,
         "outputTokens": 176,
         "totalTokens": 184,
-        "durationMs": 85
+        "durationMs": 71
       }
     }
   ],
   "summary": {
     "turnReductionPercent": 20,
-    "tokenReductionPercent": 62.86,
-    "totalTokensSaved": 1672
+    "tokenReductionPercent": 64.71,
+    "totalTokensSaved": 1837
   }
 }

@@ -4035,5 +4035,1703 @@
         "stdDevMs": 0
       }
     ]
+  },
+  {
+    "timestamp": "2026-07-19T17:37:46.941Z",
+    "commit": "cc782fe5f29c44a82506473b3796b45d82c7ee65",
+    "metrics": {
+      "totalTasks": 17,
+      "passedTasks": 17,
+      "accuracy": 100,
+      "totalTokens": 33101,
+      "avgDurationMs": 84.65
+    },
+    "tasks": [
+      {
+        "repo": "spelunk",
+        "query": "find SpelunkDB",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/db.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 392,
+        "durationMs": 119,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "find scan.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/commands/scan.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 69,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "deps src/commands/explain.ts out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/index.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 1401,
+        "durationMs": 74,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "outline src/core/db.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "SpelunkDB"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 79,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "export json",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "is-array"
+          }
+        ],
+        "passed": true,
+        "tokens": 16288,
+        "durationMs": 116,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find Router",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/router/index.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 1632,
+        "durationMs": 83,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find express",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/express.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 2152,
+        "durationMs": 73,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "deps lib/express.js out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "path",
+            "value": "response"
+          }
+        ],
+        "passed": true,
+        "tokens": 1483,
+        "durationMs": 80,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/express.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "createApplication"
+          }
+        ],
+        "passed": true,
+        "tokens": 224,
+        "durationMs": 82,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/router/route.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Route"
+          }
+        ],
+        "passed": true,
+        "tokens": 144,
+        "durationMs": 96,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find Session",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/sessions.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 807,
+        "durationMs": 105,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find requests",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/__init__.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 5905,
+        "durationMs": 83,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "outline src/requests/sessions.py",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "collections"
+          }
+        ],
+        "passed": true,
+        "tokens": 220,
+        "durationMs": 80,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "find Engine",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "gin.go"
+          }
+        ],
+        "passed": true,
+        "tokens": 1393,
+        "durationMs": 74,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "outline gin.go",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Default"
+          }
+        ],
+        "passed": true,
+        "tokens": 243,
+        "durationMs": 71,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "find main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "crates/core/main.rs"
+          }
+        ],
+        "passed": true,
+        "tokens": 265,
+        "durationMs": 81,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "outline crates/core/main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "ExitCode"
+          }
+        ],
+        "passed": true,
+        "tokens": 236,
+        "durationMs": 74,
+        "stdDevMs": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-19T19:42:55.629Z",
+    "commit": "cc782fe5f29c44a82506473b3796b45d82c7ee65",
+    "metrics": {
+      "totalTasks": 17,
+      "passedTasks": 17,
+      "accuracy": 100,
+      "totalTokens": 32896,
+      "avgDurationMs": 78.12
+    },
+    "tasks": [
+      {
+        "repo": "spelunk",
+        "query": "find SpelunkDB",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/db.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 392,
+        "durationMs": 80,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "find scan.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/commands/scan.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 106,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "deps src/commands/explain.ts out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/index.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 1401,
+        "durationMs": 69,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "outline src/core/db.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "SpelunkDB"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 77,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "export json",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "is-array"
+          }
+        ],
+        "passed": true,
+        "tokens": 16288,
+        "durationMs": 81,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find Router",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/router/index.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 1632,
+        "durationMs": 72,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find express",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/express.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 2152,
+        "durationMs": 67,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "deps lib/express.js out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "path",
+            "value": "response"
+          }
+        ],
+        "passed": true,
+        "tokens": 1483,
+        "durationMs": 81,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/express.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "createApplication"
+          }
+        ],
+        "passed": true,
+        "tokens": 224,
+        "durationMs": 95,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/router/route.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Route"
+          }
+        ],
+        "passed": true,
+        "tokens": 144,
+        "durationMs": 70,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find Session",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/sessions.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 796,
+        "durationMs": 56,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find requests",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/__init__.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 5869,
+        "durationMs": 127,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "outline src/requests/sessions.py",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "collections"
+          }
+        ],
+        "passed": true,
+        "tokens": 220,
+        "durationMs": 78,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "find Engine",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "gin.go"
+          }
+        ],
+        "passed": true,
+        "tokens": 1393,
+        "durationMs": 71,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "outline gin.go",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Default"
+          }
+        ],
+        "passed": true,
+        "tokens": 243,
+        "durationMs": 67,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "find main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "crates/core/main.rs"
+          }
+        ],
+        "passed": true,
+        "tokens": 186,
+        "durationMs": 66,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "outline crates/core/main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "ExitCode"
+          }
+        ],
+        "passed": true,
+        "tokens": 157,
+        "durationMs": 65,
+        "stdDevMs": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-19T19:43:02.650Z",
+    "commit": "cc782fe5f29c44a82506473b3796b45d82c7ee65",
+    "metrics": {
+      "totalTasks": 17,
+      "passedTasks": 17,
+      "accuracy": 100,
+      "totalTokens": 32896,
+      "avgDurationMs": 73.29
+    },
+    "tasks": [
+      {
+        "repo": "spelunk",
+        "query": "find SpelunkDB",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/db.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 392,
+        "durationMs": 61,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "find scan.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/commands/scan.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 68,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "deps src/commands/explain.ts out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/index.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 1401,
+        "durationMs": 65,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "outline src/core/db.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "SpelunkDB"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 64,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "export json",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "is-array"
+          }
+        ],
+        "passed": true,
+        "tokens": 16288,
+        "durationMs": 82,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find Router",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/router/index.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 1632,
+        "durationMs": 70,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find express",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/express.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 2152,
+        "durationMs": 74,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "deps lib/express.js out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "path",
+            "value": "response"
+          }
+        ],
+        "passed": true,
+        "tokens": 1483,
+        "durationMs": 90,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/express.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "createApplication"
+          }
+        ],
+        "passed": true,
+        "tokens": 224,
+        "durationMs": 80,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/router/route.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Route"
+          }
+        ],
+        "passed": true,
+        "tokens": 144,
+        "durationMs": 84,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find Session",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/sessions.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 796,
+        "durationMs": 107,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find requests",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/__init__.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 5869,
+        "durationMs": 80,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "outline src/requests/sessions.py",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "collections"
+          }
+        ],
+        "passed": true,
+        "tokens": 220,
+        "durationMs": 60,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "find Engine",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "gin.go"
+          }
+        ],
+        "passed": true,
+        "tokens": 1393,
+        "durationMs": 65,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "outline gin.go",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Default"
+          }
+        ],
+        "passed": true,
+        "tokens": 243,
+        "durationMs": 63,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "find main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "crates/core/main.rs"
+          }
+        ],
+        "passed": true,
+        "tokens": 186,
+        "durationMs": 65,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "outline crates/core/main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "ExitCode"
+          }
+        ],
+        "passed": true,
+        "tokens": 157,
+        "durationMs": 68,
+        "stdDevMs": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-19T19:43:37.341Z",
+    "commit": "cc782fe5f29c44a82506473b3796b45d82c7ee65",
+    "metrics": {
+      "totalTasks": 17,
+      "passedTasks": 17,
+      "accuracy": 100,
+      "totalTokens": 32896,
+      "avgDurationMs": 79.53
+    },
+    "tasks": [
+      {
+        "repo": "spelunk",
+        "query": "find SpelunkDB",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/db.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 392,
+        "durationMs": 103,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "find scan.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/commands/scan.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 167,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "deps src/commands/explain.ts out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/index.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 1401,
+        "durationMs": 72,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "outline src/core/db.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "SpelunkDB"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 65,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "export json",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "is-array"
+          }
+        ],
+        "passed": true,
+        "tokens": 16288,
+        "durationMs": 71,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find Router",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/router/index.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 1632,
+        "durationMs": 85,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find express",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/express.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 2152,
+        "durationMs": 84,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "deps lib/express.js out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "path",
+            "value": "response"
+          }
+        ],
+        "passed": true,
+        "tokens": 1483,
+        "durationMs": 81,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/express.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "createApplication"
+          }
+        ],
+        "passed": true,
+        "tokens": 224,
+        "durationMs": 74,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/router/route.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Route"
+          }
+        ],
+        "passed": true,
+        "tokens": 144,
+        "durationMs": 66,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find Session",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/sessions.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 796,
+        "durationMs": 64,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find requests",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/__init__.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 5869,
+        "durationMs": 62,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "outline src/requests/sessions.py",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "collections"
+          }
+        ],
+        "passed": true,
+        "tokens": 220,
+        "durationMs": 68,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "find Engine",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "gin.go"
+          }
+        ],
+        "passed": true,
+        "tokens": 1393,
+        "durationMs": 72,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "outline gin.go",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Default"
+          }
+        ],
+        "passed": true,
+        "tokens": 243,
+        "durationMs": 76,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "find main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "crates/core/main.rs"
+          }
+        ],
+        "passed": true,
+        "tokens": 186,
+        "durationMs": 74,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "outline crates/core/main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "ExitCode"
+          }
+        ],
+        "passed": true,
+        "tokens": 157,
+        "durationMs": 68,
+        "stdDevMs": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-19T19:46:01.775Z",
+    "commit": "cc782fe5f29c44a82506473b3796b45d82c7ee65",
+    "metrics": {
+      "totalTasks": 17,
+      "passedTasks": 17,
+      "accuracy": 100,
+      "totalTokens": 32896,
+      "avgDurationMs": 86.88
+    },
+    "tasks": [
+      {
+        "repo": "spelunk",
+        "query": "find SpelunkDB",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/db.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 392,
+        "durationMs": 117,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "find scan.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/commands/scan.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 85,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "deps src/commands/explain.ts out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/index.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 1401,
+        "durationMs": 70,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "outline src/core/db.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "SpelunkDB"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 67,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "export json",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "is-array"
+          }
+        ],
+        "passed": true,
+        "tokens": 16288,
+        "durationMs": 71,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find Router",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/router/index.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 1632,
+        "durationMs": 74,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find express",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/express.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 2152,
+        "durationMs": 70,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "deps lib/express.js out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "path",
+            "value": "response"
+          }
+        ],
+        "passed": true,
+        "tokens": 1483,
+        "durationMs": 149,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/express.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "createApplication"
+          }
+        ],
+        "passed": true,
+        "tokens": 224,
+        "durationMs": 76,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/router/route.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Route"
+          }
+        ],
+        "passed": true,
+        "tokens": 144,
+        "durationMs": 70,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find Session",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/sessions.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 796,
+        "durationMs": 78,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find requests",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/__init__.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 5869,
+        "durationMs": 84,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "outline src/requests/sessions.py",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "collections"
+          }
+        ],
+        "passed": true,
+        "tokens": 220,
+        "durationMs": 74,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "find Engine",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "gin.go"
+          }
+        ],
+        "passed": true,
+        "tokens": 1393,
+        "durationMs": 129,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "outline gin.go",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Default"
+          }
+        ],
+        "passed": true,
+        "tokens": 243,
+        "durationMs": 112,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "find main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "crates/core/main.rs"
+          }
+        ],
+        "passed": true,
+        "tokens": 186,
+        "durationMs": 78,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "outline crates/core/main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "ExitCode"
+          }
+        ],
+        "passed": true,
+        "tokens": 157,
+        "durationMs": 73,
+        "stdDevMs": 0
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-07-19T19:46:51.923Z",
+    "commit": "cc782fe5f29c44a82506473b3796b45d82c7ee65",
+    "metrics": {
+      "totalTasks": 17,
+      "passedTasks": 17,
+      "accuracy": 100,
+      "totalTokens": 32896,
+      "avgDurationMs": 68
+    },
+    "tasks": [
+      {
+        "repo": "spelunk",
+        "query": "find SpelunkDB",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/db.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 392,
+        "durationMs": 81,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "find scan.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/commands/scan.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 80,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "deps src/commands/explain.ts out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/core/index.ts"
+          }
+        ],
+        "passed": true,
+        "tokens": 1401,
+        "durationMs": 71,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "outline src/core/db.ts",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "SpelunkDB"
+          }
+        ],
+        "passed": true,
+        "tokens": 158,
+        "durationMs": 69,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "spelunk",
+        "query": "export json",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "is-array"
+          }
+        ],
+        "passed": true,
+        "tokens": 16288,
+        "durationMs": 69,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find Router",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/router/index.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 1632,
+        "durationMs": 77,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "find express",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "lib/express.js"
+          }
+        ],
+        "passed": true,
+        "tokens": 2152,
+        "durationMs": 69,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "deps lib/express.js out",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "path",
+            "value": "response"
+          }
+        ],
+        "passed": true,
+        "tokens": 1483,
+        "durationMs": 64,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/express.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "createApplication"
+          }
+        ],
+        "passed": true,
+        "tokens": 224,
+        "durationMs": 71,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "express",
+        "query": "outline lib/router/route.js",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Route"
+          }
+        ],
+        "passed": true,
+        "tokens": 144,
+        "durationMs": 61,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find Session",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/sessions.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 796,
+        "durationMs": 68,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "find requests",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "src/requests/__init__.py"
+          }
+        ],
+        "passed": true,
+        "tokens": 5869,
+        "durationMs": 62,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "requests",
+        "query": "outline src/requests/sessions.py",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "collections"
+          }
+        ],
+        "passed": true,
+        "tokens": 220,
+        "durationMs": 60,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "find Engine",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "gin.go"
+          }
+        ],
+        "passed": true,
+        "tokens": 1393,
+        "durationMs": 62,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "gin",
+        "query": "outline gin.go",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "exports",
+            "value": "Default"
+          }
+        ],
+        "passed": true,
+        "tokens": 243,
+        "durationMs": 63,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "find main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-equals",
+            "property": "path",
+            "value": "crates/core/main.rs"
+          }
+        ],
+        "passed": true,
+        "tokens": 186,
+        "durationMs": 68,
+        "stdDevMs": 0
+      },
+      {
+        "repo": "ripgrep",
+        "query": "outline crates/core/main.rs",
+        "assertions": [
+          {
+            "path": "files",
+            "operator": "any-includes",
+            "property": "imports",
+            "value": "ExitCode"
+          }
+        ],
+        "passed": true,
+        "tokens": 157,
+        "durationMs": 61,
+        "stdDevMs": 0
+      }
+    ]
   }
 ]

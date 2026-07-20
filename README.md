@@ -23,34 +23,34 @@ Spelunk is an AST-powered codebase indexer skill for coding agents. It parses yo
 
 Ever watched your AI agent run `cat` and `grep` on dozens of files just to find where a single function is defined?
 
-Spelunk uses Tree-sitter to parse your codebase and caches files, exports, imports, and dependencies in a local SQLite database. Instead of reading whole files over and over, your agent queries this index to find definitions in ~150ms, saving up to 90% on token costs.
+Spelunk uses Tree-sitter to parse your codebase and caches files, exports, imports, and dependencies in a local SQLite database. Instead of reading whole files over and over, your agent queries this index to find definitions under 100ms, saving up to 90% on token costs.
 
 ## Benchmark comparison
 
 | Sequential Search (Grep / Cat)                 | Indexed Query (Spelunk)                     |
 | :--------------------------------------------- | :------------------------------------------ |
 | Reads whole source files                       | Queries SQLite index                        |
-| Consumes 3,000 to 18,000 tokens per task       | Consumes 75 to 1,200 tokens per task        |
-| Query duration up to 18 seconds                | Query duration ~150 milliseconds            |
+| Consumes 3,000 to 18,000 tokens per task       | Consumes 80 to 1,600 tokens per task        |
+| Query duration up to 18 seconds                | Query duration ~70 milliseconds             |
 | Subject to false matches (comments, mock text) | Maps structural definitions via syntax tree |
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────┐
-│   tokens per query          ██                            75-1,200   │
+│   tokens per query          ██                            80-1,600   │
 │   vs raw file reads         ████████████████████████  3,000-18,000   │
-│   resolution time           ██                               150ms   │
+│   resolution time           █                                 70ms   │
 │   vs raw search time        ████████████████████████████  18,000ms   │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-_Evaluated across 17 tasks in the Amar, Express, Requests, Gin, and Ripgrep codebases. For example, querying a class definition (`Router` in Express) takes 203ms and uses 1,099 tokens with Spelunk, compared to 18,000 tokens using sequential file reads. Full metrics are listed in [benchmark/results.json](benchmark/results.json) and agentic LLM evaluation scenarios (showing a 64.7% token reduction and 20% turn reduction) are in [benchmark/agentic_eval_results.json](benchmark/agentic_eval_results.json)._
+_Evaluated across 17 tasks in the Amar, Express, Requests, Gin, and Ripgrep codebases. For example, querying a class definition (`Router` in Express) takes 77ms and uses 1,632 tokens with Spelunk, compared to 18,000 tokens using sequential file reads. Full metrics are listed in [benchmark/results.json](benchmark/results.json) and agentic LLM evaluation scenarios (showing a 64.7% token reduction and 20% turn reduction) are in [benchmark/agentic_eval_results.json](benchmark/agentic_eval_results.json)._
 
 ## How it compares
 
 |                       | Spelunk                                 | Plain Grep                                 | ctags                                | LSP (Language Server)           |
 | :-------------------- | :-------------------------------------- | :----------------------------------------- | :----------------------------------- | :------------------------------ |
 | **Speed**             | Instant SQLite cache lookups            | Slow on large repositories                 | Fast                                 | Slow startup, high memory use   |
-| **Token Cost**        | Low (average ~900 tokens per query)     | High (3k to 18k tokens, reads whole files) | Medium (returns a flat tag list)     | High (heavy JSON-RPC overhead)  |
+| **Token Cost**        | Low (average ~1,000 tokens per query)   | High (3k to 18k tokens, reads whole files) | Medium (returns a flat tag list)     | High (heavy JSON-RPC overhead)  |
 | **Accuracy**          | High (ignores comments and variables)   | Low (matches every text match)             | Medium (basic symbol matches only)   | High (full semantic resolution) |
 | **Approach**          | Tree-sitter AST (parses code structure) | None (blind text search)                   | Regex & basic AST (editor tags only) | Full compiler-level analysis    |
 | **Agent Integration** | Simple JSON or Markdown script output   | Needs complex parsing regex loops          | Raw editor-focused tag formats       | Complex client-server protocol  |

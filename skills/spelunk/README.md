@@ -6,7 +6,7 @@ Spelunk is an AST-powered codebase indexer skill for coding agents. It parses yo
 
 Ever watched your AI agent run `cat` and `grep` on dozens of files just to find where a single function is defined?
 
-Spelunk uses Tree-sitter to parse your codebase and caches files, exports, imports, and dependencies in a local SQLite database. Instead of reading whole files over and over, your agent queries this index to find definitions in ~150ms, saving up to 90% on token costs.
+Spelunk uses Tree-sitter to parse your codebase and caches files, exports, imports, and dependencies in a local SQLite database. Instead of reading whole files over and over, your agent queries this index to find definitions under 100ms, saving up to 90% on token costs.
 
 ## Typical agent & human workflow
 
