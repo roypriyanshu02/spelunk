@@ -1,5 +1,12 @@
 node_modules/
+npm-debug.log
+temp/
+evals/
+*.db
+dist/
+.tsdown/
+.benchmark_repos/
 package-lock.json
 skills/spelunk/scripts/
 .agents/
-dist/
+coverage/

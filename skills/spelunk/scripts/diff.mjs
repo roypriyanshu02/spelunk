@@ -1,29 +1,30 @@
 #!/usr/bin/env node
-import { r as runDiff, t as runCliCommand } from "./common.mjs";
-import path from "node:path";
-
-//#region src/commands/diff.ts
 /**
-* @file diff.ts
-* @description CLI command definition to calculate structural AST differences (imports and exports) between two files.
+* AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY.
 */
-runCliCommand({
+import { n as runDiff, u as runCliCommand } from "./common.mjs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+//#region src/commands/diff.ts
+const diffCommand = {
 	name: "diff",
+	positionalFileIndices: [0, 1],
 	options: {
 		"file-a": { type: "string" },
 		"file-b": { type: "string" }
 	},
 	validate: (opts, positionals) => {
-		const fa = opts["file-a"] || positionals[0];
-		const fb = opts["file-b"] || positionals[1];
-		return !!fa && !!fb || "Provide both file paths to compare. Specify file-a and file-b.";
+		const fileA = opts["file-a"] || positionals[0];
+		const fileB = opts["file-b"] || positionals[1];
+		return !!fileA && !!fileB || "Provide both file-a and file-b paths to compare.";
 	},
 	execute: (dbPath, opts, positionals) => {
 		return runDiff(opts["file-a"] || positionals[0], opts["file-b"] || positionals[1], dbPath);
 	},
-	formatMarkdown: (res) => {
-		const urlA = `file://${path.resolve(process.cwd(), res.fileA).replace(/\\/g, "/")}`;
-		const urlB = `file://${path.resolve(process.cwd(), res.fileB).replace(/\\/g, "/")}`;
+	formatMarkdown: (res, opts) => {
+		const rootDir = opts?.rootDir || process.cwd();
+		const urlA = pathToFileURL(path.resolve(rootDir, res.fileA)).toString();
+		const urlB = pathToFileURL(path.resolve(rootDir, res.fileB)).toString();
 		return [
 			`### Spelunk Structural Diff`,
 			`- **File A**: [${res.fileA}](${urlA})`,
@@ -38,7 +39,9 @@ runCliCommand({
 			res.imports.removed.length > 0 ? `- **Removed**: ${res.imports.removed.map((x) => `\`${x}\``).join(", ")}` : "- **Removed**: _None_"
 		].join("\n");
 	}
-});
-
+};
+runCliCommand(diffCommand);
 //#endregion
-export {  };
+export { diffCommand };
+
+//# sourceMappingURL=diff.mjs.map

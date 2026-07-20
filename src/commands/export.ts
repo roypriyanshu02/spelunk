@@ -1,29 +1,31 @@
-/**
- * @file export.ts
- * @description CLI command definition to dump the complete index structure in JSON or Markdown formats.
- */
-import { runCliCommand, runExport } from "@core";
+import { runCliCommand, runExport, type FileRecord } from "@core";
 
-runCliCommand({
+export type ExportResult = string | { files: FileRecord[] };
+
+export const exportCommand = {
   name: "export",
   options: {
     format: { type: "string", short: "f" },
   },
-  validate: (opts, positionals) => {
-    const f = opts.format || positionals[0];
-    if (f !== "json" && f !== "md" && f !== "markdown") {
+  validate: (opts: any, positionals: any) => {
+    const rawFormat = opts.format || positionals[0];
+    if (!rawFormat) return true;
+    const format = typeof rawFormat === "string" ? rawFormat.toLowerCase() : "";
+    if (format !== "json" && format !== "md" && format !== "markdown") {
       return "Format must be 'json', 'md', or 'markdown'.";
     }
     return true;
   },
-  execute: (dbPath, opts, positionals) => {
-    const f = opts.format || positionals[0];
-    const exportFormat = f === "json" ? "json" : "md";
-    opts.format = exportFormat === "json" ? "json" : "markdown";
+  execute: (dbPath: any, opts: any, positionals: any) => {
+    const rawFormat = opts.format || positionals[0];
+    const format = typeof rawFormat === "string" ? rawFormat.toLowerCase() : "";
+    const exportFormat = format === "json" ? "json" : "md";
     return runExport(exportFormat, dbPath);
   },
-  formatMarkdown: (res) => {
+  formatMarkdown: (res: any) => {
     return typeof res === "string" ? res : JSON.stringify(res, null, 2);
   },
-  formatJson: (res) => res,
-});
+  formatJson: (res: any) => res,
+};
+
+runCliCommand(exportCommand);

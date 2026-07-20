@@ -49,40 +49,44 @@ You will need:
 
 ## Development workflow
 
-We format code with `oxfmt` and run static checks using `oxlint` and the TypeScript compiler.
+We format code with `oxfmt` and check it with `oxlint` and the TypeScript compiler.
 
-To format your files, run:
+Format files:
 
 ```bash
 npm run format
 ```
 
-To lint your code, run:
+Run the linter:
 
 ```bash
 npm run lint
 ```
 
-To run our unit tests (we use Vitest), run:
+Check types:
+
+```bash
+npm run typecheck
+```
+
+Run Vitest unit tests:
 
 ```bash
 npm run test
 ```
 
-If you modify any parsing or query logic, make sure you also run our benchmark and behavior checks:
+If you change parsing or query logic, run the benchmark and evaluation scripts:
 
 ```bash
 npm run benchmark
 npm run eval
 ```
 
-To bump the version when needed:
+Bump the package version (this updates `package.json` and `package-lock.json`):
 
 ```bash
 npm version <major|minor|patch>
 ```
-
-This command updates both `package.json` and `package-lock.json`.
 
 ## Database schema and agent skills
 
@@ -103,22 +107,22 @@ If you modify the SQLite database schema in `src/core/db.ts`, or change any flag
    - `fix: resolve crash on missing WASM cache directory`
    - `docs: update setup instructions in README`
 4. Target the `main` branch when you open your pull request.
-5. Run the linters, formatters, and tests locally to verify everything passes before you push:
+5. Verify your changes pass checks before pushing:
    ```bash
-   npm run lint && npm run format && npm run test
+   npm run format && npm run lint && npm run typecheck && npm run test
    ```
 6. Fill out the [pull request template](.github/PULL_REQUEST_TEMPLATE.md) when you submit your changes.
 
 ### Continuous integration
 
-GitHub Actions automatically runs our test suite on every pull request targeting `main` (defined in [.github/workflows/test.yml](.github/workflows/test.yml)). The workflow:
+GitHub Actions runs our test suite on every pull request to `main`. You can view the configuration in [.github/workflows/test.yml](.github/workflows/test.yml). The workflow:
 
-- Installs all dependencies.
-- Builds the project using `npm run build` to verify skill script compilation.
-- Runs static checks and linters using `npm run lint`.
-- Runs all unit tests using `npm run test`.
+- Installs dependencies.
+- Builds the project (`npm run build`) to test skill script compilation.
+- Runs `npm run lint` and `npm run typecheck` for static analysis.
+- Runs unit tests via `npm run test`.
 
-You can watch the logs and run status directly in the pull request interface on GitHub.
+You can track the job status in the pull request interface.
 
 ## Need help?
 

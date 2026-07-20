@@ -1,4 +1,5 @@
 import { SpelunkDB } from "./db";
+import { isPathContained } from "./commands";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -18,9 +19,17 @@ async function withDB<T>(dbPath: string, fn: (db: SpelunkDB) => Promise<T> | T):
 
 function resolveRelativePath(db: SpelunkDB, targetPath: string): string {
   const rootDir = db.getMetadata("rootDir") || process.cwd();
-  return path.relative(rootDir, path.resolve(targetPath)).replace(/\\/g, "/");
+  const absoluteTarget = path.resolve(targetPath);
+  const relative = path.relative(rootDir, absoluteTarget).replace(/\\/g, "/");
+  if (!isPathContained(rootDir, absoluteTarget)) {
+    throw new Error(`Access denied: Target path '${targetPath}' escapes the workspace root.`);
+  }
+  return relative;
 }
 
+/**
+ * Searches the indexed database for files matching a query string.
+ */
 export function runFind(query: string, dbPath: string, limit: number = 50, offset: number = 0) {
   return withDB(dbPath, (db) => {
     const { items, total_count, has_more } = db.search(query, limit, offset);
@@ -28,6 +37,9 @@ export function runFind(query: string, dbPath: string, limit: number = 50, offse
   });
 }
 
+/**
+ * Retrieves the imports and exports outline for a specific file.
+ */
 export function runOutline(targetPath: string, dbPath: string) {
   return withDB(dbPath, (db) => {
     const relativePath = resolveRelativePath(db, targetPath);
@@ -39,6 +51,9 @@ export function runOutline(targetPath: string, dbPath: string) {
   });
 }
 
+/**
+ * Traces the dependency tree (incoming or outgoing) of a target file.
+ */
 export function runDeps(
   targetPath: string,
   direction: "in" | "out",
@@ -64,6 +79,9 @@ export function runDeps(
   });
 }
 
+/**
+ * Explains or sets the summary of a targeted file in the index.
+ */
 export async function runExplain(
   targetPath: string,
   shouldSummarize: boolean,
@@ -83,9 +101,6 @@ export async function runExplain(
     if (!shouldSummarize) {
       if (record.summary) {
         const isStale = !!(record.summary_hash && record.summary_hash !== record.hash);
-        if (isStale) {
-          console.error(`Warning: Cached summary for ${relativeTarget} is stale (file modified).`);
-        }
         return { path: relativeTarget, summary: record.summary, stale: isStale };
       } else {
         throw new Error(
@@ -119,79 +134,85 @@ export async function runExplain(
 
       record.summary = agentSummary;
       record.summary_hash = record.hash;
-      db.upsertFile(record);
+      db.upsertFiles([record]);
 
       return { path: relativeTarget, summary: agentSummary, stale: false };
     }
   });
 }
 
+/**
+ * Exports all indexed files metadata in either JSON format or Markdown format.
+ */
 export function runExport(format: "json" | "md", dbPath: string) {
   return withDB(dbPath, (db) => {
-    const allFiles = db.getAllFiles();
-
     if (format === "json") {
+      const allFiles = db.getAllFiles(true);
       return { files: allFiles };
     } else {
-      let md = "# Spelunk Codemap Export\n\n";
+      const allFiles = db.getAllFiles(false);
+      const lines: string[] = ["# Spelunk Codemap Export", ""];
       for (const f of allFiles) {
-        md += `## ${f.path}\n`;
-        md += `- **Parsed**: ${f.parsed}\n`;
+        lines.push(`## ${f.path}`);
+        lines.push(`- **Parsed**: ${f.parsed}`);
         if (f.reason) {
-          md += `- **Reason**: ${f.reason}\n`;
+          lines.push(`- **Reason**: ${f.reason}`);
         }
         if (f.exports.length > 0) {
-          md += `- **Exports**:\n`;
+          lines.push("- **Exports**:");
           for (const exp of f.exports) {
-            md += `  - \`${exp}\`\n`;
+            lines.push(`  - \`${exp}\``);
           }
         }
         if (f.imports.length > 0) {
-          md += `- **Imports**:\n`;
+          lines.push("- **Imports**:");
           for (const imp of f.imports) {
-            md += `  - \`${imp}\`\n`;
+            lines.push(`  - \`${imp}\``);
           }
         }
-        md += "\n";
+        lines.push("");
       }
-      return md.trim();
+      return lines.join("\n").trim();
     }
   });
 }
 
+/**
+ * Computes the additions and deletions of imports and exports between two files.
+ */
 export function runDiff(fileA: string, fileB: string, dbPath: string) {
   return withDB(dbPath, (db) => {
-    const relA = resolveRelativePath(db, fileA);
-    const relB = resolveRelativePath(db, fileB);
+    const relativeFileA = resolveRelativePath(db, fileA);
+    const relativeFileB = resolveRelativePath(db, fileB);
 
-    const recA = db.getFile(relA);
-    const recB = db.getFile(relB);
+    const recordA = db.getFile(relativeFileA);
+    const recordB = db.getFile(relativeFileB);
 
-    if (!recA) {
+    if (!recordA) {
       throw new Error(
-        `File not indexed: ${relA}. The file must be added to the index first. Run 'spelunk scan' to update the index.`,
+        `File not indexed: ${relativeFileA}. The file must be added to the index first. Run 'spelunk scan' to update the index.`,
       );
     }
-    if (!recB) {
+    if (!recordB) {
       throw new Error(
-        `File not indexed: ${relB}. The file must be added to the index first. Run 'spelunk scan' to update the index.`,
+        `File not indexed: ${relativeFileB}. The file must be added to the index first. Run 'spelunk scan' to update the index.`,
       );
     }
 
-    const setExportsA = new Set(recA.exports);
-    const setExportsB = new Set(recB.exports);
-    const setImportsA = new Set(recA.imports);
-    const setImportsB = new Set(recB.imports);
+    const setExportsA = new Set(recordA.exports);
+    const setExportsB = new Set(recordB.exports);
+    const setImportsA = new Set(recordA.imports);
+    const setImportsB = new Set(recordB.imports);
 
-    const addedExports = recB.exports.filter((x) => !setExportsA.has(x));
-    const removedExports = recA.exports.filter((x) => !setExportsB.has(x));
+    const addedExports = recordB.exports.filter((x) => !setExportsA.has(x));
+    const removedExports = recordA.exports.filter((x) => !setExportsB.has(x));
 
-    const addedImports = recB.imports.filter((x) => !setImportsA.has(x));
-    const removedImports = recA.imports.filter((x) => !setImportsB.has(x));
+    const addedImports = recordB.imports.filter((x) => !setImportsA.has(x));
+    const removedImports = recordA.imports.filter((x) => !setImportsB.has(x));
 
     return {
-      fileA: relA,
-      fileB: relB,
+      fileA: relativeFileA,
+      fileB: relativeFileB,
       exports: {
         added: addedExports,
         removed: removedExports,

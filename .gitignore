@@ -6,4 +6,5 @@ evals/
 dist/
 .tsdown/
 .benchmark_repos/
-
+coverage/
+.agents/
