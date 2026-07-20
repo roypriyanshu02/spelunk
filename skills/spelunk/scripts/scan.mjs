@@ -1,29 +1,45 @@
 #!/usr/bin/env node
-import { c as scanDirectory, t as runCliCommand } from "./common.mjs";
-
-//#region src/commands/scan.ts
 /**
-* @file scan.ts
-* @description CLI command definition to trigger recursive source directories scanning and AST indexing.
+* AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY.
 */
-runCliCommand({
+import { c as scanDirectory, l as watchDirectory, u as runCliCommand } from "./common.mjs";
+//#region src/commands/scan.ts
+const scanCommand = {
 	name: "scan",
+	skipUpToDateCheck: true,
+	positionalDirIndex: 0,
 	options: {
-		dir: { type: "string" },
-		concurrency: { type: "string" }
+		concurrency: { type: "string" },
+		watch: {
+			type: "boolean",
+			short: "w"
+		}
 	},
 	validate: (opts) => {
 		if (opts.concurrency) {
 			const parsed = parseInt(opts.concurrency, 10);
-			if (isNaN(parsed) || parsed <= 0) return "Provide a valid concurrency limit. Concurrency must be a positive integer.";
+			if (isNaN(parsed) || parsed <= 0) return "Concurrency limit must be a positive integer.";
 		}
 		return true;
 	},
 	execute: (dbPath, opts, positionals) => {
-		return scanDirectory({
-			rootDir: opts.dir || positionals[0] || process.cwd(),
+		const rootDir = opts.dir || positionals[0] || process.cwd();
+		const concurrency = opts.concurrency ? parseInt(opts.concurrency, 10) : void 0;
+		const offline = opts["no-download"];
+		const forceFallback = opts["force-fallback"];
+		if (opts.watch) return watchDirectory({
+			rootDir,
 			dbPath,
-			concurrency: opts.concurrency ? parseInt(opts.concurrency, 10) : void 0
+			concurrency,
+			offline,
+			forceFallback
+		});
+		return scanDirectory({
+			rootDir,
+			dbPath,
+			concurrency,
+			offline,
+			forceFallback
 		});
 	},
 	formatMarkdown: (res) => {
@@ -38,7 +54,9 @@ runCliCommand({
 			`- **Scan duration**: ${duration} (${speed})`
 		].join("\n");
 	}
-});
-
+};
+runCliCommand(scanCommand);
 //#endregion
-export {  };
+export { scanCommand };
+
+//# sourceMappingURL=scan.mjs.map

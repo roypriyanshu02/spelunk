@@ -1,0 +1,4 @@
+# Spelunk ignore patterns (standard gitignore format)
+# Files and directories matching these patterns will be excluded from Spelunk AST indexing.
+
+.agents/

@@ -1,34 +1,32 @@
-/**
- * @file outline.ts
- * @description CLI command definition to output imports and exports mapping for a specific file.
- */
-import { runCliCommand, runOutline } from "@core";
+import { runCliCommand, runOutline, type FileRecord } from "@core";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
-runCliCommand({
+export interface OutlineResult {
+  files: FileRecord[];
+}
+
+export const outlineCommand = {
   name: "outline",
+  positionalFileIndices: [0],
   options: {
     file: { type: "string" },
   },
-  validate: (opts, positionals) => {
-    return (
-      !!opts.file ||
-      !!positionals[0] ||
-      "Provide a file path. Specify a file to generate its outline."
-    );
+  validate: (opts: any, positionals: any) => {
+    return !!opts.file || !!positionals[0] || "Provide a file path to generate its outline.";
   },
-  execute: (dbPath, opts, positionals) => {
-    const f = opts.file || positionals[0];
-    return runOutline(f, dbPath);
+  execute: (dbPath: any, opts: any, positionals: any) => {
+    const filePath = opts.file || positionals[0];
+    return runOutline(filePath, dbPath);
   },
-  formatMarkdown: (res, opts, positionals) => {
-    const f = opts.file || positionals[0];
+  formatMarkdown: (res: any, opts: any, positionals: any) => {
+    const filePath = opts.file || positionals[0];
     if (!res.files || res.files.length === 0) {
-      return `### File not found or not indexed: \`${f}\``;
+      return `### File not found or not indexed: \`${filePath}\``;
     }
-    const record = res.files[0];
-    const fullPath = path.resolve(process.cwd(), record.path);
-    const fileUrl = `file://${fullPath.replace(/\\/g, "/")}`;
+    const record: FileRecord = res.files[0];
+    const rootDir = opts?.rootDir || process.cwd();
+    const fileUrl = pathToFileURL(path.resolve(rootDir, record.path)).toString();
 
     const lines = [
       `### Spelunk Outline for [${record.path}](${fileUrl})`,
@@ -43,11 +41,15 @@ runCliCommand({
     }
 
     const exportsStr =
-      record.exports.length > 0 ? record.exports.map((e: any) => `\`${e}\``).join(", ") : "_None_";
+      record.exports.length > 0
+        ? record.exports.map((e: string) => `\`${e}\``).join(", ")
+        : "_None_";
     lines.push(`- **Exports**: ${exportsStr}`);
 
     const importsStr =
-      record.imports.length > 0 ? record.imports.map((i: any) => `\`${i}\``).join(", ") : "_None_";
+      record.imports.length > 0
+        ? record.imports.map((i: string) => `\`${i}\``).join(", ")
+        : "_None_";
     lines.push(`- **Imports**: ${importsStr}`);
 
     if (record.summary) {
@@ -56,4 +58,6 @@ runCliCommand({
 
     return lines.join("\n");
   },
-});
+};
+
+runCliCommand(outlineCommand);

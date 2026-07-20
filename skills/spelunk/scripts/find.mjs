@@ -1,13 +1,12 @@
 #!/usr/bin/env node
-import { o as runFind, t as runCliCommand } from "./common.mjs";
-import path from "node:path";
-
-//#region src/commands/find.ts
 /**
-* @file find.ts
-* @description CLI command definition to search for indexed files or symbols matching a query.
+* AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY.
 */
-runCliCommand({
+import { a as runFind, u as runCliCommand } from "./common.mjs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+//#region src/commands/find.ts
+const findCommand = {
 	name: "find",
 	options: {
 		query: {
@@ -26,31 +25,39 @@ runCliCommand({
 		}
 	},
 	validate: (opts, positionals) => {
-		return !!opts.query || !!positionals[0] || "Provide a search query. The indexer needs a search term to find files or exports.";
+		return !!opts.query || !!positionals[0] || "Provide a search query to find files or exports.";
 	},
 	execute: (dbPath, opts, positionals) => {
-		return runFind(opts.query || positionals[0], dbPath, parseInt(opts.limit, 10), parseInt(opts.offset, 10));
+		const query = opts.query || positionals[0];
+		const parsedLimit = parseInt(opts.limit, 10);
+		const limit = Number.isNaN(parsedLimit) || parsedLimit <= 0 ? 50 : parsedLimit;
+		const parsedOffset = parseInt(opts.offset, 10);
+		return runFind(query, dbPath, limit, Number.isNaN(parsedOffset) || parsedOffset < 0 ? 0 : parsedOffset);
 	},
 	formatMarkdown: (res, opts, positionals) => {
-		const q = opts.query || positionals[0];
+		if (res.files.length === 0) return "_No matching files or symbols found._";
+		const query = opts.query || positionals[0];
+		const rootDir = opts?.rootDir || process.cwd();
 		const rangeStr = `Showing results ${res.offset + 1} to ${res.offset + res.files.length} of ${res.total_count}.`;
 		const hasMoreStr = res.has_more ? " Use --limit or --offset to page through results." : "";
 		const header = [
-			`### Spelunk Find Results for \`${q}\``,
+			`### Spelunk Find Results for \`${query}\``,
 			`*${rangeStr}${hasMoreStr}*`,
 			"",
 			"| File Path | Exports | Summary |",
 			"| :--- | :--- | :--- |"
 		];
 		const rows = res.files.map((f) => {
-			const fileUrl = `file://${path.resolve(process.cwd(), f.path).replace(/\\/g, "/")}`;
+			const fileUrl = pathToFileURL(path.resolve(rootDir, f.path)).toString();
 			const exportsStr = f.exports.length > 0 ? f.exports.map((e) => `\`${e}\``).join(", ") : "_None_";
 			const summaryStr = f.summary || "_No summary available_";
 			return `| [${f.path}](${fileUrl}) | ${exportsStr} | ${summaryStr} |`;
 		});
 		return [...header, ...rows].join("\n");
 	}
-});
-
+};
+runCliCommand(findCommand);
 //#endregion
-export {  };
+export { findCommand };
+
+//# sourceMappingURL=find.mjs.map

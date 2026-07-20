@@ -1,29 +1,30 @@
-/**
- * @file explain.ts
- * @description CLI command definition to display or set architectural files summaries.
- */
 import { runCliCommand, runExplain } from "@core";
 
-runCliCommand({
+export interface ExplainResult {
+  path: string;
+  summary: string;
+  stale: boolean;
+}
+
+export const explainCommand = {
   name: "explain",
+  positionalFileIndices: [0],
   options: {
     file: { type: "string" },
     "set-summary": { type: "string" },
   },
-  validate: (opts, positionals) => {
-    return (
-      !!opts.file ||
-      !!positionals[0] ||
-      "Provide a file path. Specify a file to get or set its summary."
-    );
+  validate: (opts: any, positionals: any) => {
+    return !!opts.file || !!positionals[0] || "Provide a file path to get or set its summary.";
   },
-  execute: (dbPath, opts, positionals) => {
-    const f = opts.file || positionals[0];
+  execute: (dbPath: any, opts: any, positionals: any) => {
+    const filePath = opts.file || positionals[0];
     const agentSummary = opts["set-summary"];
-    return runExplain(f, !!agentSummary, dbPath, agentSummary);
+    return runExplain(filePath, !!agentSummary, dbPath, agentSummary);
   },
-  formatMarkdown: (res) => {
+  formatMarkdown: (res: any) => {
     return res.summary;
   },
-  formatJson: (res) => res,
-});
+  formatJson: (res: any) => res,
+};
+
+runCliCommand(explainCommand);

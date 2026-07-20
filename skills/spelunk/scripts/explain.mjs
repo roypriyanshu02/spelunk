@@ -1,30 +1,31 @@
 #!/usr/bin/env node
-import { i as runExplain, t as runCliCommand } from "./common.mjs";
-
-//#region src/commands/explain.ts
 /**
-* @file explain.ts
-* @description CLI command definition to display or set architectural files summaries.
+* AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY.
 */
-runCliCommand({
+import { r as runExplain, u as runCliCommand } from "./common.mjs";
+//#region src/commands/explain.ts
+const explainCommand = {
 	name: "explain",
+	positionalFileIndices: [0],
 	options: {
 		file: { type: "string" },
 		"set-summary": { type: "string" }
 	},
 	validate: (opts, positionals) => {
-		return !!opts.file || !!positionals[0] || "Provide a file path. Specify a file to get or set its summary.";
+		return !!opts.file || !!positionals[0] || "Provide a file path to get or set its summary.";
 	},
 	execute: (dbPath, opts, positionals) => {
-		const f = opts.file || positionals[0];
+		const filePath = opts.file || positionals[0];
 		const agentSummary = opts["set-summary"];
-		return runExplain(f, !!agentSummary, dbPath, agentSummary);
+		return runExplain(filePath, !!agentSummary, dbPath, agentSummary);
 	},
 	formatMarkdown: (res) => {
 		return res.summary;
 	},
 	formatJson: (res) => res
-});
-
+};
+runCliCommand(explainCommand);
 //#endregion
-export {  };
+export { explainCommand };
+
+//# sourceMappingURL=explain.mjs.map

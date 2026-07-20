@@ -1,137 +1,91 @@
 ---
 name: spelunk
-description: AST-powered codebase indexer. Caches imports, exports, symbols, and dependencies in SQLite. Use this skill to trace dependency trees, locate symbol definitions, outline files, and map codebase architecture. Trigger it whenever the user asks about codebase structure, file dependencies, import/export outlines, or where classes, functions, or symbols are defined, even if they do not mention Spelunk. Exclude small repositories (<15 files) or simple text grep searches.
+description: AST-powered codebase indexer using SQLite and Tree-sitter. Caches imports, exports, symbols, and dependency graphs. Traces dependency trees, locates symbol definitions, outlines files, calculates structural diffs, and maps codebase architecture. Trigger whenever the user asks about codebase structure, file dependencies, import/export outlines, call graphs, architecture maps, or symbol definitions. Exclude small repositories (fewer than 15 files) or single-file text grep searches.
+compatibility: node >= 24.18.0 (native node:sqlite)
+metadata:
+  argument-hint: "[find|deps|outline|explain|diff|scan|query] [options]"
+  repository: https://github.com/roypriyanshu02/spelunk
 ---
 
 # Spelunk
 
-Spelunk parses repositories into a local SQLite database using Tree-sitter. Querying the index replaces slow file scans and minimizes token usage.
+Spelunk indexes codebases into local SQLite via Tree-sitter. Querying the index replaces slow file scans (`cat`/`grep`) and saves up to 90% of token budget.
 
-## Guidelines for AI Agents
+## Database persistence
 
-1. **Initialize the Index:** Check for `.spelunk/data.db` before querying. Run `node <skill-path>/scripts/scan.mjs` if the database is missing or empty. Querying a missing index returns empty arrays. Scan the workspace first.
-2. **Keep the Index Fresh:** Scan the codebase after modifying files. The scanner parses only changed files, keeping indexing fast.
-3. **Trace Dependency Trees:** Use `node <skill-path>/scripts/deps.mjs` to trace import chains. Do not read files line-by-line. The script resolves imports down the tree.
-4. **Locate Symbols:** Run `node <skill-path>/scripts/find.mjs` with a symbol name to locate its definition. This avoids slow text searches.
-5. **Fuzzy & Trigram Search:** If exact symbol resolution fails, query the `files_fts` virtual table using custom SQL to execute trigram searches across paths, exports, and imports.
-6. **Cache Structural Summaries:** Write file summaries to the index using `explain.mjs` with `--set-summary`. This caches architecture context, avoiding the need to read large files in subsequent prompts.
-7. **Verify Refactors:** Run `diff.mjs` to compare two versions of a file. Use this after modifying imports or exports to prevent breaking downstream dependencies.
-8. **Query SQLite Directly:** Execute custom SQL queries on `.spelunk/data.db` if built-in scripts do not fit the task. Direct access gives full flexibility over the schema.
-9. **Handle Errors:** If a query fails, verify the file exists on disk. Rebuild the index with `scan.mjs`. Fall back to standard grep searches if needed.
-10. **Resolve Skill Path:** Identify the directory containing this `SKILL.md` file. In instructions below, `<skill-path>` refers to the absolute path of this directory.
-11. **Batch Queries for Efficiency:** When performing multiple sequential symbol or dependency lookups, query the SQLite database directly using `sqlite3` rather than spawning multiple Node scripts. This bypasses V8 process startup overhead.
+`.spelunk/data.db` (or `SPELUNK_DB_PATH`) persists across agent sessions. Index status and metadata are durable. Re-verify index freshness only on command failure or file modifications. Do not check environment or rescan on session start.
 
-## Setup & Running the Scripts
+## Guidelines
 
-Run scripts from the workspace root using Node.js (>= 24.18.0). Replace `<skill-path>` with the resolved path to the skill directory (e.g. `skills/spelunk`). Every command accepts standard flags or their positional equivalents in order. When `--dir` is omitted, it defaults to the current working directory.
+### 🚀 Environment & Index Lifecycle
 
-- **Scan Codebase:** `node <skill-path>/scripts/scan.mjs [--dir <dir>] [--concurrency <number>]`
-- **Find Symbol/File:** `node <skill-path>/scripts/find.mjs --query <query> [--limit <limit>] [--offset <offset>] [--format json|markdown]`
-- **Outline File:** `node <skill-path>/scripts/outline.mjs --file <filepath> [--format json|markdown]`
-- **Trace Dependencies:** `node <skill-path>/scripts/deps.mjs --file <filepath> --direction <in|out> [--depth <depth>] [--limit <limit>] [--offset <offset>] [--format json|markdown]`
-- **Explain File:** `node <skill-path>/scripts/explain.mjs --file <filepath> [--set-summary "<text>"]`
-- **Export Codemap:** `node <skill-path>/scripts/export.mjs [--format json|md|markdown]`
-- **Structural Diff:** `node <skill-path>/scripts/diff.mjs --file-a <fileA> --file-b <fileB> [--format json|markdown]`
+- **Check Before Scanning**: Run `scan.mjs` only when `.spelunk/data.db` is missing/empty or on initial workspace setup.
+- **Incremental Updates**: Limit rescans to modified files when stderr indicates the index is out of date.
+
+### 🔍 Search & Dependency Resolution
+
+- **Symbol & Dependency Lookups**: Use `deps.mjs` to trace import chains down or up the tree instead of reading files line-by-line. Use `find.mjs` to locate symbol definitions.
+- **Fuzzy Search**: Query `files_fts` table via `query.mjs` for trigram search when exact symbol lookups fail.
+- **Refactor Impact**: Run `diff.mjs` after modifying imports/exports to verify downstream dependencies before committing changes.
+
+### 🛡️ Safety & Security
+
+- **Read-Only SQL**: `query.mjs` strictly permits read-only statements (`SELECT`, `WITH`, `PRAGMA`, `EXPLAIN`). Always parameterize dynamic inputs with `?` placeholders.
+- **Credential Protection**: Credential files (`.env`, `.pem`, SSH keys) are automatically excluded during scans.
+- **Gitignore Hygiene**: Ensure `.spelunk/` is present in your workspace `.gitignore`.
+
+### ⚡ Performance & Batching
+
+- **Token Efficiency**: Default to `--format json` for intermediate agent reasoning to save tokens. Reserve `--format markdown` for final user presentation.
+- **Batching Queries**: Combine sequential SQL lookups into a single `query.mjs` call to avoid Node process startup overhead (~100–300ms per invocation).
+- **Scoping Flags**: Use `--limit`, `--file`, and `--query` to keep returned payloads targeted.
+
+### 🪜 Resolution Ladder (Stop at first matching rung)
+
+1. **Rung 1**: Query existing SQLite index (`.spelunk/data.db`).
+2. **Rung 2**: Run `scan.mjs` incrementally for modified files if index is stale.
+3. **Rung 3**: Fall back to regex parsing (`--force-fallback`) if WASM grammars fail offline.
+4. **Rung 4**: Fall back to text search (`grep`/`cat`) as last resort for single-file lookups.
+
+### ⚠️ System Limitations
+
+- **File Size & Type**: Files >1MB and binary files are skipped from AST parsing.
+- **Dynamic Constructs**: Dynamic `import()`, reflection, and C/C++ preprocessor macros are not evaluated statically.
+
+## Script usage
+
+Run scripts from workspace root using Node.js. Replace `<skill-path>` with the absolute skill path. Global flags: `--format <json|markdown>` (`-f`), `--dir <dir>`, `--no-download`, `--force-fallback`.
+
+Quick example: `node <skill-path>/scripts/find.mjs Router`
+
+- `node <skill-path>/scripts/status.mjs [<dir>]`
+- `node <skill-path>/scripts/query.mjs "<sql>" [<args>...]`
+- `node <skill-path>/scripts/scan.mjs [<dir>] [--concurrency <n>] [-w|--watch]`
+- `node <skill-path>/scripts/find.mjs <query>|--query|-q <query> [-l <limit>] [-o <offset>]`
+- `node <skill-path>/scripts/outline.mjs <filepath>|--file <filepath>`
+- `node <skill-path>/scripts/deps.mjs <filepath>|--file <filepath> <in|out>|--direction <in|out> [<depth>|-d <depth>] [-l <limit>] [-o <offset>]`
+- `node <skill-path>/scripts/explain.mjs <filepath>|--file <filepath> [--set-summary "<text>"]`
+- `node <skill-path>/scripts/export.mjs [<format>]`
+- `node <skill-path>/scripts/diff.mjs <fileA>|--file-a <fileA> <fileB>|--file-b <fileB>`
 
 > [!IMPORTANT]
-> **Network Requirement**: The indexer requires internet access on the first run to download WASM grammars to `~/.cache/spelunk/wasm/`. If offline, parsing falls back to regex extraction.
+> WASM grammars fetch to `~/.cache/spelunk/wasm/` on first run. Force offline mode with `--no-download` (`SPELUNK_OFFLINE=1`), force fallback with `--force-fallback` (`SPELUNK_FORCE_FALLBACK=1`), or set custom grammars via `SPELUNK_WASM_DIR`. Credential files (`.env`, `.pem`, SSH keys) are automatically skipped. Ensure `.spelunk/` is listed in `.gitignore`.
 
-> [!NOTE]
-> **Bundled Helper**: The compiler bundles helper functions into [common.mjs](scripts/common.mjs) for faster loading. In the source repository, you can inspect details in `src/`.
+## Database schema
 
-> [!NOTE]
-> **Summarizing Files**: To store or update a file summary, run `explain.mjs` with `--file <filepath>` and `--set-summary "<text>"`. To read a cached summary, run `explain.mjs --file <filepath>` without `--set-summary`.
+Inspect [references/database.md](./references/database.md) for full DDL, indexes, and triggers.
 
-## Database Schema & Custom SQL
+- **`files`**: Primary records (`path`, `parsed`, `reason`, `hash`, `exports`, `imports`, `summary`, `summary_hash`, `mtime`, `size`).
+- **`file_imports`**: Resolved dependency links (`file_path`, `imported_path`).
+- **`file_exports` & `file_raw_imports`**: Flat symbol name indexes (`file_path`, `name`).
+- **`metadata`**: Workspace configuration (`key`, `value`). Known keys: `rootDir`, `scanStatus`, `scanPid`, `lastScanTime`, `lastGitCommit`.
+- **`files_fts`**: Virtual FTS5 trigram search table auto-synced with `files`.
 
-The SQLite database contains these tables:
+## Reference payloads & SQL examples
 
-### 1. `files` Table
+Inspect Level 3 reference documentation for detailed contracts and schemas:
 
-Stores primary index records for each file in the workspace.
-
-- `path` (TEXT, Primary Key): Workspace-relative path with forward slashes.
-- `parsed` (INTEGER): `1` if parsed, `0` if skipped.
-- `reason` (TEXT): Skip reason if not parsed.
-- `hash` (TEXT): Content verification hash (SHA-256).
-- `exports` (TEXT): JSON array of exported symbols.
-- `imports` (TEXT): JSON array of dependency strings.
-- `summary` (TEXT): Optional AI summary.
-- `summary_hash` (TEXT): Content hash for stale checks.
-- `mtime` (INTEGER): Modification time in milliseconds.
-- `size` (INTEGER): File size in bytes.
-
-### 2. `file_imports` Table
-
-Stores resolved dependency links for fast recursive import graph traversals.
-
-- `file_path` (TEXT): The source file path.
-- `imported_path` (TEXT): The resolved dependency file path.
-
-### 3. `file_exports` & `file_raw_imports` Tables
-
-Helper tables storing flat name indexes for fast LIKE/FTS queries.
-
-- `file_path` (TEXT): The file declaring the export/import.
-- `name` (TEXT): The raw symbol or dependency string name.
-
-### 4. `metadata` Table
-
-Stores key-value configurations for execution environment independence.
-
-- `key` (TEXT, Primary Key): Configuration key (e.g., `rootDir`, `scanStatus`).
-- `value` (TEXT): The configuration value.
-
-### 5. `files_fts` Virtual Table
-
-SQLite triggers (`files_ai`, `files_au`, `files_ad`) keep this FTS5 trigram-based virtual search index in sync with the `files` table.
-
-### SQL Examples
-
-- **Unparsed files:**
-  `sqlite3 .spelunk/data.db "SELECT path, reason FROM files WHERE parsed = 0;"`
-- **Symbol exporter (direct):**
-  `sqlite3 .spelunk/data.db "SELECT file_path FROM file_exports WHERE name = 'SpelunkDB';"`
-- **Symbol exporter (JSON):**
-  `sqlite3 .spelunk/data.db "SELECT path FROM files, json_each(files.exports) WHERE json_each.value = 'SpelunkDB';"`
-- **Trigram fuzzy search on exports:**
-  `sqlite3 .spelunk/data.db "SELECT path FROM files_fts WHERE exports MATCH 'Router';"`
-
-## Command Output Examples
-
-### Outline Command (`node <skill-path>/scripts/outline.mjs --file src/services/db.ts`)
-
-```json
-{
-  "files": [
-    {
-      "path": "src/services/db.ts",
-      "parsed": true,
-      "exports": ["SpelunkDB", "FileRecord"],
-      "imports": ["node:sqlite", "fs", "path"],
-      "summary": "Manages SQLite initialization and CRUD operations."
-    }
-  ]
-}
-```
-
-### Dependency Command (`node <skill-path>/scripts/deps.mjs --file src/services/db.ts --direction in`)
-
-```json
-{
-  "files": [
-    {
-      "path": "src/index.ts",
-      "parsed": true,
-      "exports": [],
-      "imports": ["./services/db"],
-      "summary": "Application entry point.",
-      "rank": 1
-    }
-  ],
-  "limit": 50,
-  "offset": 0,
-  "total_count": 1,
-  "has_more": false
-}
-```
+- [references/examples.md](./references/examples.md): Full JSON output payloads, error schemas, and SQL query examples.
+- [references/database.md](./references/database.md): Deep-dive SQLite schema specs, index definitions, and trigram FTS configuration.
+- [references/contracts.md](./references/contracts.md): Script invocation contracts and output interface definitions.
+- [references/codemap.v1.json](./references/codemap.v1.json): JSON Schema (Draft-07) validation spec for codemap payloads.

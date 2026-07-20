@@ -1,31 +1,41 @@
-/**
- * @file diff.ts
- * @description CLI command definition to calculate structural AST differences (imports and exports) between two files.
- */
 import { runCliCommand, runDiff } from "@core";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
-runCliCommand({
+export interface DiffResult {
+  fileA: string;
+  fileB: string;
+  exports: {
+    added: string[];
+    removed: string[];
+  };
+  imports: {
+    added: string[];
+    removed: string[];
+  };
+}
+
+export const diffCommand = {
   name: "diff",
+  positionalFileIndices: [0, 1],
   options: {
     "file-a": { type: "string" },
     "file-b": { type: "string" },
   },
-  validate: (opts, positionals) => {
-    const fa = opts["file-a"] || positionals[0];
-    const fb = opts["file-b"] || positionals[1];
-    return (!!fa && !!fb) || "Provide both file paths to compare. Specify file-a and file-b.";
+  validate: (opts: any, positionals: any) => {
+    const fileA = opts["file-a"] || positionals[0];
+    const fileB = opts["file-b"] || positionals[1];
+    return (!!fileA && !!fileB) || "Provide both file-a and file-b paths to compare.";
   },
-  execute: (dbPath, opts, positionals) => {
-    const fa = opts["file-a"] || positionals[0];
-    const fb = opts["file-b"] || positionals[1];
-    return runDiff(fa, fb, dbPath);
+  execute: (dbPath: any, opts: any, positionals: any) => {
+    const fileA = opts["file-a"] || positionals[0];
+    const fileB = opts["file-b"] || positionals[1];
+    return runDiff(fileA, fileB, dbPath);
   },
-  formatMarkdown: (res) => {
-    const fullA = path.resolve(process.cwd(), res.fileA);
-    const urlA = `file://${fullA.replace(/\\/g, "/")}`;
-    const fullB = path.resolve(process.cwd(), res.fileB);
-    const urlB = `file://${fullB.replace(/\\/g, "/")}`;
+  formatMarkdown: (res: any, opts?: any) => {
+    const rootDir = opts?.rootDir || process.cwd();
+    const urlA = pathToFileURL(path.resolve(rootDir, res.fileA)).toString();
+    const urlB = pathToFileURL(path.resolve(rootDir, res.fileB)).toString();
 
     const lines = [
       `### Spelunk Structural Diff`,
@@ -34,21 +44,23 @@ runCliCommand({
       "",
       "#### Exports Changes",
       res.exports.added.length > 0
-        ? `- **Added**: ${res.exports.added.map((x: any) => `\`${x}\``).join(", ")}`
+        ? `- **Added**: ${res.exports.added.map((x: string) => `\`${x}\``).join(", ")}`
         : "- **Added**: _None_",
       res.exports.removed.length > 0
-        ? `- **Removed**: ${res.exports.removed.map((x: any) => `\`${x}\``).join(", ")}`
+        ? `- **Removed**: ${res.exports.removed.map((x: string) => `\`${x}\``).join(", ")}`
         : "- **Removed**: _None_",
       "",
       "#### Imports Changes",
       res.imports.added.length > 0
-        ? `- **Added**: ${res.imports.added.map((x: any) => `\`${x}\``).join(", ")}`
+        ? `- **Added**: ${res.imports.added.map((x: string) => `\`${x}\``).join(", ")}`
         : "- **Added**: _None_",
       res.imports.removed.length > 0
-        ? `- **Removed**: ${res.imports.removed.map((x: any) => `\`${x}\``).join(", ")}`
+        ? `- **Removed**: ${res.imports.removed.map((x: string) => `\`${x}\``).join(", ")}`
         : "- **Removed**: _None_",
     ];
 
     return lines.join("\n");
   },
-});
+};
+
+runCliCommand(diffCommand);

@@ -1,5 +1,24 @@
+# Build & Output
+dist/
+.tsdown/
+coverage/
+
+# Dependencies & Locks
 node_modules/
 package-lock.json
-skills/spelunk/scripts/
+pnpm-lock.yaml
+yarn.lock
+
+# Cache & Temporary
+temp/
+evals/
+.benchmark_repos/
 .agents/
-dist/
+*.db
+
+# Generated / External Scripts
+skills/spelunk/scripts/
+
+# Logs & Environment
+*.log
+.env*

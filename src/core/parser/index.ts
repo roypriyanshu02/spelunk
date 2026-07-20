@@ -1,8 +1,3 @@
-/**
- * @file index.ts
- * @description Entry point for the parser. Chooses between AST and custom regex-based parsers.
- */
-
 import path from "node:path";
 import Parser from "web-tree-sitter";
 import {
@@ -10,32 +5,22 @@ import {
   getLanguage,
   resetWasmParser,
   fallbackMode,
-  parserInstance,
   EXT_TO_WASM,
   incrementConsecutiveErrors,
   resetConsecutiveErrors,
+  parserInstance,
 } from "./wasm";
-import { isCustomFile, parseCustomFile } from "./custom";
-import { extractASTData } from "./ast";
+export { getWasmCacheDir, downloadWasmBinary, clearWasmCache } from "./wasm";
+import { isCustomFile, parseCustomFile, parseFallback } from "./custom";
+import { extractASTData, astExtensions } from "./ast";
 
 /**
- * Parses a file to extract its imports and exports.
- * Chooses between AST parsing (tree-sitter) and custom regex-based parsing.
+ * Normalizes file extensions for routing to the correct parser.
  *
- * @param filePath File path to parse
- * @param content File content
- * @returns Imports and exports lists
+ * @param filePath File path
+ * @returns Normalized extension
  */
-export async function parseFile(
-  filePath: string,
-  content: string,
-): Promise<{ imports: string[]; exports: string[] }> {
-  if (isCustomFile(filePath)) {
-    return parseCustomFile(filePath, content);
-  }
-
-  await initParser();
-
+export function resolveFileExtension(filePath: string): string {
   let ext = path.extname(filePath).toLowerCase();
   const filename = path.basename(filePath).toLowerCase();
   if (filePath.toLowerCase().endsWith(".blade.php")) {
@@ -43,35 +28,73 @@ export async function parseFile(
   } else if (["podfile", "gemfile", "fastfile", "appfile"].includes(filename)) {
     ext = ".rb";
   }
+  return ext;
+}
 
-  if (fallbackMode || !parserInstance || !EXT_TO_WASM[ext]) {
-    return { imports: [], exports: [] };
+/**
+ * Parses a file to extract its imports and exports.
+ * Chooses between AST parsing (tree-sitter) and custom regex-based parsing.
+ *
+ * @param filePath File path to parse
+ * @param content File content
+ * @param options Parser options
+ * @returns Imports and exports lists
+ */
+export async function parseFile(
+  filePath: string,
+  content: string,
+  options?: { wasmDir?: string; offline?: boolean; forceFallback?: boolean },
+): Promise<{ imports: string[]; exports: string[] }> {
+  if (isCustomFile(filePath)) {
+    return parseCustomFile(filePath, content);
   }
 
-  const lang = await getLanguage(ext);
-  if (!lang) {
-    return { imports: [], exports: [] };
+  const ext = resolveFileExtension(filePath);
+
+  if (fallbackMode || !EXT_TO_WASM[ext] || !astExtensions.has(ext)) {
+    return parseFallback(ext, content);
   }
 
-  let tree: Parser.Tree | null = null;
   try {
-    parserInstance.setLanguage(lang);
-    tree = parserInstance.parse(content);
-    resetConsecutiveErrors();
+    await initParser(options?.wasmDir, options);
+  } catch {
+    return parseFallback(ext, content);
+  }
 
-    return extractASTData(ext, tree);
-  } catch (err) {
-    incrementConsecutiveErrors();
-    console.error(`AST parsing failed for ${filePath}.`, err);
-    return { imports: [], exports: [] };
-  } finally {
-    if (tree) {
-      try {
-        tree.delete();
-      } catch (e) {
-        console.error("Failed to release AST memory:", e);
+  if (fallbackMode || !parserInstance) {
+    return parseFallback(ext, content);
+  }
+
+  const parser = parserInstance;
+
+  try {
+    const lang = await getLanguage(ext, options?.wasmDir, options);
+    if (!lang) {
+      return parseFallback(ext, content);
+    }
+
+    let tree: Parser.Tree | null = null;
+    try {
+      parser.setLanguage(lang);
+      tree = parser.parse(content);
+      resetConsecutiveErrors();
+
+      return extractASTData(ext, tree);
+    } catch (err) {
+      incrementConsecutiveErrors();
+      console.error(`AST parsing failed for ${filePath}.`, err);
+      return parseFallback(ext, content);
+    } finally {
+      if (tree) {
+        try {
+          tree.delete();
+        } catch (e) {
+          console.error("Failed to release AST memory:", e);
+        }
       }
     }
+  } catch {
+    return parseFallback(ext, content);
   }
 }
 

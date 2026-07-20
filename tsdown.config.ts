@@ -1,53 +1,40 @@
 import { defineConfig } from "tsdown";
 
-export default defineConfig([
-  {
-    entry: ["src/core/index.ts"],
-    format: "esm",
-    dts: true,
-    clean: true,
-    outDir: "dist",
-    platform: "node",
-    target: "node24",
+export default defineConfig({
+  entry: ["src/commands/*.ts"],
+  format: "esm",
+  platform: "node",
+  target: "node24",
+  outDir: "skills/spelunk/scripts",
+  clean: true,
+  sourcemap: true,
+  treeshake: true,
+  define: {
+    __dirname: "import.meta.dirname",
+    ENVIRONMENT_IS_WEB: "false",
+    ENVIRONMENT_IS_WORKER: "false",
+    "typeof window": '"undefined"',
+    "typeof document": '"undefined"',
+    "typeof importScripts": '"undefined"',
   },
-  {
-    entry: ["src/commands/*.ts"],
-    format: "esm",
-    minify: false,
-    shims: true,
-    platform: "node",
-    target: "node24",
-    outDir: "skills/spelunk/scripts",
-    clean: true,
-    deps: {
-      neverBundle: ["node:sqlite"],
-      alwaysBundle: ["web-tree-sitter", "tsconfig-paths", "ignore"],
-    },
-    plugins: [
-      {
-        name: "fix-code-scanning",
-        transform(code, id) {
-          if (id.includes("web-tree-sitter") || id.includes("tsconfig-paths")) {
-            const updated = code.replace(
-              /\.replace\((['"])\*\1\s*,\s*([^)]+)\)/g,
-              ".replaceAll($1*$1, $2)",
-            );
-            return {
-              code: updated.replace(/\beval\(/g, "(0, eval)("),
-              map: null,
-            };
-          }
-        },
-      },
-    ],
-    outputOptions: {
-      banner: "#!/usr/bin/env node",
-      manualChunks(id) {
-        if (id.includes("/src/core/")) {
-          return "common";
-        }
-      },
-      chunkFileNames: "[name].mjs",
-    },
+  deps: {
+    alwaysBundle: ["web-tree-sitter", "tsconfig-paths", "ignore"],
+    onlyBundle: false,
   },
-]);
+  suppressWarnings: [/Use of direct `eval` function/],
+  outputOptions: {
+    banner(chunk) {
+      const warning = "/**\n * AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY.\n */\n";
+      if (chunk.isEntry) {
+        return "#!/usr/bin/env node\n" + warning;
+      }
+      return warning;
+    },
+    manualChunks(id) {
+      if (/[/\\]src[/\\]core[/\\]/.test(id)) {
+        return "common";
+      }
+    },
+    chunkFileNames: "[name].mjs",
+  },
+});

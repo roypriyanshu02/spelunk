@@ -6,18 +6,13 @@
     "lib": ["ES2024"],
     "types": ["node"],
     "strict": true,
-    "noImplicitAny": true,
-    "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
     "allowJs": true,
     "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
     "paths": {
-      "@core/*": ["./src/core/*"],
-      "@core": ["./src/core/index.ts"],
-      "@commands/*": ["./src/commands/*"]
+      "@core": ["./src/core/index.ts"]
     }
   },
-  "include": ["src/**/*", "tests/**/*", "scripts/**/*"]
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "benchmark/**/*"]
 }
