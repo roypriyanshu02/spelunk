@@ -1,6 +1,6 @@
 {
   "name": "spelunk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "AST-based codebase indexer skill for coding agents. Parses repositories with Tree-sitter into a local SQLite index to trace dependency trees and locate symbols without scanning raw files.",
   "keywords": [
     "agent-skill",

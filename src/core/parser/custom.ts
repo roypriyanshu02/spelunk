@@ -352,7 +352,14 @@ function parseAssembly(content: string, imports: string[], exports: string[]) {
 }
 
 function parseSvelte(content: string, imports: string[], exports: string[]) {
-  const cleanContent = content.includes("<!--") ? content.replace(HTML_COMMENT_REGEX, "") : content;
+  let cleanContent = content;
+  if (cleanContent.includes("<!--")) {
+    let previous;
+    do {
+      previous = cleanContent;
+      cleanContent = cleanContent.replace(HTML_COMMENT_REGEX, "");
+    } while (cleanContent !== previous && cleanContent.includes("<!--"));
+  }
   SVELTE_SCRIPT_REGEX.lastIndex = 0;
   let scriptMatch;
   while ((scriptMatch = SVELTE_SCRIPT_REGEX.exec(cleanContent)) !== null) {
@@ -602,8 +609,10 @@ function parseCsv(content: string, exports: string[]) {
   }
 }
 
-const C_STYLE_COMMENT_AND_STRING_REGEX =
+const HTML_COMMENT_AND_C_STYLE_REGEX =
   /("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])*')|(`(?:\\.|[^`\\])*`)|(<!--[\s\S]*?-->)|(\/\*[\s\S]*?\*\/)|([ \t]*\/\/.*)/g;
+const C_STYLE_COMMENT_AND_STRING_REGEX =
+  /("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])*')|(`(?:\\.|[^`\\])*`)|(\/\*[\s\S]*?\*\/)|([ \t]*\/\/.*)/g;
 const HASH_COMMENT_AND_STRING_REGEX =
   /("""[\s\S]*?""")|('''[\s\S]*?''')|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])*')|([ \t]*#.*)/g;
 const SQL_COMMENT_AND_STRING_REGEX =
@@ -618,18 +627,34 @@ const ASM_COMMENT_AND_STRING_REGEX = /("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])*')|([
  */
 export function stripComments(content: string, ext: string, filename: string): string {
   if (C_STYLE_COMMENT_EXTENSIONS.has(ext)) {
-    return content.replace(
-      C_STYLE_COMMENT_AND_STRING_REGEX,
-      (match, dquote, squote, btick, htmlComment) => {
-        if (dquote || squote || btick) {
-          return match;
-        }
-        if (htmlComment) {
-          return ext === ".svelte" || ext === ".astro" ? "" : match;
-        }
-        return "";
-      },
-    );
+    const isHtmlCommentTarget = ext === ".svelte" || ext === ".astro";
+    if (isHtmlCommentTarget && content.includes("<!--")) {
+      let currentContent = content;
+      let previous;
+      do {
+        previous = currentContent;
+        currentContent = currentContent.replace(
+          HTML_COMMENT_AND_C_STYLE_REGEX,
+          (match, dquote, squote, btick, htmlComment) => {
+            if (dquote || squote || btick) {
+              return match;
+            }
+            if (htmlComment) {
+              return "";
+            }
+            return "";
+          },
+        );
+      } while (currentContent !== previous && currentContent.includes("<!--"));
+      return currentContent;
+    }
+
+    return content.replace(C_STYLE_COMMENT_AND_STRING_REGEX, (match, dquote, squote, btick) => {
+      if (dquote || squote || btick) {
+        return match;
+      }
+      return "";
+    });
   }
 
   if (
